@@ -9,9 +9,6 @@ import { useUser } from "@/firebase/auth/use-user";
 import { useDoc } from "@/firebase/firestore/use-doc";
 import type { User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
 
 function DashboardSkeleton() {
     return (
@@ -51,34 +48,9 @@ function DashboardSkeleton() {
 export default function DashboardPage() {
   const { user: firebaseUser, loading: loadingAuth } = useUser();
   const { data: appUser, loading: loadingUser } = useDoc<User>(firebaseUser ? `users/${firebaseUser.uid}` : '');
-  const [loadingTimeout, setLoadingTimeout] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (loadingAuth || loadingUser) {
-        setLoadingTimeout(true);
-      }
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [loadingAuth, loadingUser]);
-
-  if (!loadingTimeout && (loadingAuth || loadingUser)) {
+  
+  if (loadingAuth || loadingUser) {
     return <DashboardSkeleton />;
-  }
-
-  if (loadingTimeout) {
-    return (
-        <div className="container mx-auto max-w-2xl px-4 py-8">
-            <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Loading Error</AlertTitle>
-                <AlertDescription>
-                    We couldn't load your dashboard in time. Please check your internet connection and try refreshing the page.
-                </AlertDescription>
-            </Alert>
-        </div>
-    );
   }
 
   if (!firebaseUser) {
