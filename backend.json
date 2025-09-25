@@ -1,0 +1,80 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user profile.",
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "The user's unique username."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address."
+        },
+        "bio": {
+          "type": "string",
+          "description": "A short bio for the user."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the user was created."
+        }
+      },
+      "required": ["username", "email", "createdAt"]
+    },
+    "Question": {
+      "title": "Question",
+      "description": "A question submitted to a user.",
+      "type": "object",
+      "properties": {
+        "toUserId": {
+          "type": "string",
+          "description": "The ID of the user the question is for."
+        },
+        "questionText": {
+          "type": "string",
+          "description": "The text of the question."
+        },
+        "answerText": {
+          "type": "string",
+          "description": "The text of the answer."
+        },
+        "isAnswered": {
+          "type": "boolean",
+          "description": "Whether the question has been answered."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the question was created."
+        },
+        "answeredAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the question was answered."
+        }
+      },
+      "required": ["toUserId", "questionText", "isAnswered", "createdAt"]
+    }
+  },
+  "auth": {
+    "providers": ["email"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Stores user profile information."
+    },
+    "/questions/{questionId}": {
+      "schema": {
+        "$ref": "#/entities/Question"
+      },
+      "description": "Stores questions submitted by users."
+    }
+  }
+}
