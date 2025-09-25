@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
 import { useUser } from "@/firebase/auth/use-user";
@@ -11,6 +11,7 @@ import type { User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
+import { NotesSection } from "@/components/dashboard/notes-section";
 
 function DashboardSkeleton() {
     return (
@@ -100,7 +101,14 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <DashboardClient user={appUser} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <DashboardClient user={appUser} />
+          </div>
+          <div>
+            <NotesSection user={appUser} />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -58,6 +58,23 @@
         }
       },
       "required": ["toUserId", "questionText", "isAnswered", "createdAt"]
+    },
+    "Note": {
+      "title": "Note",
+      "description": "A private note for a user.",
+      "type": "object",
+      "properties": {
+        "contentText": {
+          "type": "string",
+          "description": "The content of the note."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the note was created."
+        }
+      },
+      "required": ["contentText", "createdAt"]
     }
   },
   "auth": {
@@ -75,6 +92,12 @@
         "$ref": "#/entities/Question"
       },
       "description": "Stores questions submitted by users."
+    },
+    "/users/{userId}/notes/{noteId}": {
+      "schema": {
+        "$ref": "#/entities/Note"
+      },
+      "description": "Stores private notes for a user."
     }
   }
 }

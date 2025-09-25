@@ -17,3 +17,9 @@ export type Question = {
   createdAt: Date | Timestamp;
   answeredAt: Date | Timestamp | null;
 };
+
+export type Note = {
+    id: string;
+    contentText: string;
+    createdAt: Date | Timestamp;
+};

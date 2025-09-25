@@ -3,35 +3,45 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users Collection
-    match /users/{userId} {
-      // Anyone can read user profiles (for public profile pages)
-      allow read: if true;
-      
-      // A user can create their own profile upon signup
-      allow create: if request.auth.uid == userId;
-
-      // A user can only update their own bio
-      allow update: if request.auth.uid == userId && request.resource.data.keys().hasOnly(['bio']);
+    // Helper functions
+    function isOwner(userId) {
+      return request.auth.uid == userId;
     }
 
-    // Questions Collection
-    match /questions/{questionId} {
-      // Read rules:
-      // 1. The recipient of the question can read it (for their dashboard)
-      // 2. Anyone can read a question if it has been answered (for public profiles)
-      allow read: if resource.data.toUserId == request.auth.uid || resource.data.isAnswered == true;
+    // USERS collection
+    match /users/{userId} {
+      // Anyone can read a user's public profile (username, bio)
+      allow get: if true;
+      
+      // A user can create their own profile during signup
+      allow create: if isOwner(userId);
 
+      // A user can only update their own bio
+      allow update: if isOwner(userId) && request.resource.data.keys().hasOnly(['bio']);
+
+      // A user cannot delete their profile through the client
+      allow delete: if false;
+
+      // NOTES sub-collection
+      match /notes/{noteId} {
+        // A user can perform any action on their own notes
+        allow read, write, delete: if isOwner(userId);
+      }
+    }
+
+    // QUESTIONS collection
+    match /questions/{questionId} {
       // Anyone can create (ask) a question
       allow create: if true;
 
-      // Update rules:
-      // A user can only answer or edit an answer for a question they received
-      allow update: if request.auth.uid == resource.data.toUserId;
+      // Only the recipient can read a question before it's answered
+      allow read: if resource.data.isAnswered == true || isOwner(resource.data.toUserId);
 
-      // Delete rules:
-      // A user can only delete a question they received
-      allow delete: if request.auth.uid == resource.data.toUserId;
+      // The recipient can update a question (to answer it)
+      allow update: if isOwner(resource.data.toUserId);
+      
+      // The recipient can delete a question
+      allow delete: if isOwner(resource.data.toUserId);
     }
   }
 }
