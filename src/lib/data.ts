@@ -1,27 +1,19 @@
 'use server';
 
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  Timestamp,
-} from 'firebase/firestore';
-import { firestore } from '@/lib/auth'; // Use the initialized firestore from auth
 import type { Question } from './types';
+import admin from 'firebase-admin';
 
-const questionsCollection = collection(firestore, 'questions');
+// Re-use the initialized admin app from auth.ts
+const firestore = admin.firestore();
+const questionsCollection = firestore.collection('questions');
 
 export async function getQuestionsForUser(userId: string): Promise<Question[]> {
-  const q = query(questionsCollection, where('toUserId', '==', userId), orderBy('createdAt', 'desc'));
-  const querySnapshot = await getDocs(q);
+  const q = questionsCollection.where('toUserId', '==', userId).orderBy('createdAt', 'desc');
+  const querySnapshot = await q.get();
   return querySnapshot.docs.map(doc => {
     const data = doc.data();
-    const createdAt = data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date();
-    const answeredAt = data.answeredAt instanceof Timestamp ? data.answeredAt.toDate() : null;
+    const createdAt = data.createdAt.toDate();
+    const answeredAt = data.answeredAt ? data.answeredAt.toDate() : null;
     return {
       id: doc.id,
       ...data,
@@ -32,18 +24,22 @@ export async function getQuestionsForUser(userId: string): Promise<Question[]> {
 }
 
 export async function getQuestionById(questionId: string): Promise<Question | undefined> {
-  const questionDocRef = doc(questionsCollection, questionId);
-  const questionDoc = await getDoc(questionDocRef);
-  if (!questionDoc.exists()) {
+  const questionDocRef = questionsCollection.doc(questionId);
+  const questionDoc = await questionDocRef.get();
+  if (!questionDoc.exists) {
     return undefined;
   }
   const data = questionDoc.data();
-  const createdAt = data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date();
-  const answeredAt = data.answeredAt instanceof Timestamp ? data.answeredAt.toDate() : null;
-  return {
-    id: questionDoc.id,
-    ...data,
-    createdAt,
-    answeredAt,
-  } as Question;
+  // Firestore admin SDK returns Timestamps, so we convert them to Dates
+  if (data) {
+    const createdAt = data.createdAt.toDate();
+    const answeredAt = data.answeredAt ? data.answeredAt.toDate() : null;
+    return {
+      id: questionDoc.id,
+      ...data,
+      createdAt,
+      answeredAt,
+    } as Question;
+  }
+  return undefined;
 }

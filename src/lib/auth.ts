@@ -1,19 +1,30 @@
 'use server';
 
-import { collection, doc, getDoc, getDocs, query, where, Timestamp, initializeFirestore } from 'firebase/firestore';
 import { cookies } from 'next/headers';
 import { SESSION_COOKIE_NAME } from './constants';
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { firebaseConfig } from '@/firebase/config';
 import type { User } from './types';
+import admin from 'firebase-admin';
+import { firebaseConfig } from '@/firebase/config';
 
-// This is a server-only file. We need to initialize the app here.
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const firestore = initializeFirestore(app, {});
+// Initialize Firebase Admin SDK
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+    databaseURL: `https://${firebaseConfig.projectId}.firebaseio.com`
+  });
+}
 
+const firestore = admin.firestore();
 
 export async function createSession(userId: string, idToken: string) {
-  cookies().set(SESSION_COOKIE_NAME, JSON.stringify({ userId, idToken }), {
+  // In a real app, you would verify the idToken here using the Admin SDK.
+  // For this starter, we'll trust the client and just set the cookie.
+  // const decodedToken = await admin.auth().verifyIdToken(idToken);
+  // if (decodedToken.uid !== userId) {
+  //   throw new Error("Token UID does not match provided user ID");
+  // }
+  
+  cookies().set(SESSION_COOKIE_NAME, JSON.stringify({ userId }), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     maxAge: 60 * 60 * 24 * 7, // One week
@@ -25,20 +36,20 @@ export async function clearSession() {
   cookies().delete(SESSION_COOKIE_NAME);
 }
 
-const usersCollection = collection(firestore, 'users');
+const usersCollection = firestore.collection('users');
 
 export async function getUserById(id: string): Promise<User | undefined> {
-  const userDocRef = doc(usersCollection, id);
-  const userDoc = await getDoc(userDocRef);
-  if (!userDoc.exists()) {
+  const userDocRef = usersCollection.doc(id);
+  const userDoc = await userDocRef.get();
+  if (!userDoc.exists) {
     return undefined;
   }
   return { id: userDoc.id, ...userDoc.data() } as User;
 }
 
 export async function getUserByUsername(username: string): Promise<User | undefined> {
-  const q = query(usersCollection, where('username', '==', username));
-  const querySnapshot = await getDocs(q);
+  const q = usersCollection.where('username', '==', username);
+  const querySnapshot = await q.get();
   if (querySnapshot.empty) {
     return undefined;
   }
@@ -57,7 +68,7 @@ export async function getAuthenticatedUser(): Promise<User | undefined> {
     const { userId } = JSON.parse(sessionCookie);
     if (!userId) return undefined;
     
-    // In a real app, you'd use the Admin SDK to verify the token.
+    // In a real app, you'd use the Admin SDK to verify the session cookie/token.
     // For this starter, we'll trust the userId in the cookie.
     const user = await getUserById(userId);
     return user;

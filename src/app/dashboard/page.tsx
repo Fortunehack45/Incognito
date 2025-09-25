@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Copy } from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
+import type { User } from "@/lib/types";
 
 export default async function DashboardPage() {
   const user = await getAuthenticatedUser();
@@ -36,7 +37,7 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
-        <DashboardClient user={user as any} />
+        <DashboardClient user={user as User} />
       </div>
     </div>
   );
