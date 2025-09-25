@@ -2,8 +2,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { onSnapshot, doc } from 'firebase/firestore';
 import { useFirestore } from '../provider';
-import { FirestorePermissionError } from '../errors';
-import { errorEmitter } from '../error-emitter';
 
 export function useDoc<T>(docPath: string) {
     const firestore = useFirestore();
@@ -32,11 +30,7 @@ export function useDoc<T>(docPath: string) {
                 setLoading(false);
             },
             (err) => {
-                const permissionError = new FirestorePermissionError({
-                    path: docPath,
-                    operation: 'get',
-                });
-                errorEmitter.emit('permission-error', permissionError);
+                console.error(`Error fetching doc ${docPath}:`, err);
                 setLoading(false);
             }
         );

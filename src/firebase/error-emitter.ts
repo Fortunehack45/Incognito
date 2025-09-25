@@ -1,11 +1,10 @@
 import { EventEmitter } from 'events';
-import type { FirestorePermissionError } from './errors';
 
 // This is a simple event emitter that allows us to broadcast errors
 // from anywhere in the app and listen for them in a central location.
 
 type ErrorEvents = {
-  'permission-error': (error: FirestorePermissionError) => void;
+  'permission-error': (error: Error) => void;
 };
 
 // We extend EventEmitter to have typed events.

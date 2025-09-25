@@ -1,9 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { onSnapshot, query, collection, where, orderBy, type Query, getDocs } from 'firebase/firestore';
+import { onSnapshot, query, collection, where, orderBy, type Query } from 'firebase/firestore';
 import { useFirestore } from '../provider';
-import { errorEmitter } from '../error-emitter';
-import { FirestorePermissionError } from '../errors';
 
 export function useCollection<T>(collectionPath: string, options?: {
     where?: [string, any, any];
@@ -41,11 +39,7 @@ export function useCollection<T>(collectionPath: string, options?: {
                 setLoading(false);
             },
             (err) => {
-                const permissionError = new FirestorePermissionError({
-                    path: collectionPath,
-                    operation: 'list',
-                });
-                errorEmitter.emit('permission-error', permissionError);
+                console.error(`Error fetching collection ${collectionPath}:`, err);
                 setLoading(false);
             }
         );
