@@ -35,26 +35,26 @@ export function LoginForm() {
   });
 
   const onSubmit = async (values: FormValues) => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-      const idToken = await userCredential.user.getIdToken();
-      const formData = new FormData();
-      formData.append('email', values.email);
-      formData.append('password', values.password);
-      formData.append('uid', userCredential.user.uid);
-      formData.append('idToken', idToken);
-      
-      startTransition(() => {
+    startTransition(async () => {
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+        const idToken = await userCredential.user.getIdToken();
+        const formData = new FormData();
+        formData.append('email', values.email);
+        formData.append('password', values.password);
+        formData.append('uid', userCredential.user.uid);
+        formData.append('idToken', idToken);
+        
         formAction(formData);
-      });
 
-    } catch (error: any) {
-       toast({
-        title: 'Login Failed',
-        description: 'Invalid email or password.',
-        variant: 'destructive',
-      });
-    }
+      } catch (error: any) {
+        toast({
+          title: 'Login Failed',
+          description: 'Invalid email or password.',
+          variant: 'destructive',
+        });
+      }
+    });
   };
 
   useEffect(() => {

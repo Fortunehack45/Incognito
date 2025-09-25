@@ -39,38 +39,39 @@ export function SignupForm() {
   });
 
   const onSubmit = async (values: FormValues) => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-      const user = userCredential.user;
-      
-      const newUser = {
-        email: values.email,
-        username: values.username,
-        bio: null,
-        createdAt: new Date(),
-      };
-      await setDoc(doc(firestore, 'users', user.uid), newUser);
-      
-      const idToken = await user.getIdToken();
-      
-      const formData = new FormData();
-      formData.append('username', values.username);
-      formData.append('email', values.email);
-      formData.append('password', values.password);
-      formData.append('uid', user.uid);
-      formData.append('idToken', idToken);
-      
-      startTransition(() => {
+    startTransition(async () => {
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+        const user = userCredential.user;
+        
+        // Ensure the user document is created before proceeding
+        const newUser = {
+          email: values.email,
+          username: values.username,
+          bio: '', // Initialize with empty string
+          createdAt: new Date(),
+        };
+        await setDoc(doc(firestore, 'users', user.uid), newUser);
+        
+        const idToken = await user.getIdToken();
+        
+        const formData = new FormData();
+        formData.append('username', values.username);
+        formData.append('email', values.email);
+        formData.append('password', values.password);
+        formData.append('uid', user.uid);
+        formData.append('idToken', idToken);
+        
         formAction(formData);
-      });
 
-    } catch (error: any) {
-      if (error.code === 'auth/email-already-in-use') {
-        toast({ title: 'Signup Failed', description: 'An account with this email already exists.', variant: 'destructive' });
-      } else {
-        toast({ title: 'Signup Failed', description: 'An unknown error occurred.', variant: 'destructive' });
+      } catch (error: any) {
+        if (error.code === 'auth/email-already-in-use') {
+          toast({ title: 'Signup Failed', description: 'An account with this email already exists.', variant: 'destructive' });
+        } else {
+          toast({ title: 'Signup Failed', description: 'An unknown error occurred during signup.', variant: 'destructive' });
+        }
       }
-    }
+    });
   };
 
 
