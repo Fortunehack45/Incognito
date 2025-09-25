@@ -1,6 +1,6 @@
+'use server'
 import { cookies } from 'next/headers';
 import { getUserById, type User } from '@/lib/data';
-import 'server-only';
 
 const SESSION_COOKIE_NAME = 'qa_hub_session';
 
@@ -34,15 +34,4 @@ export async function getAuthenticatedUser(): Promise<User | undefined> {
 
 export async function clearSession() {
   cookies().delete(SESSION_COOKIE_NAME);
-}
-
-export async function getSessionToken() {
-    const session = cookies().get(SESSION_COOKIE_NAME)?.value;
-    if (!session) return null;
-    try {
-        const { idToken } = JSON.parse(session);
-        return idToken;
-    } catch {
-        return null;
-    }
 }
