@@ -1,15 +1,22 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-
 import {
-  answerQuestion as answerQuestionDb,
-  deleteQuestion as deleteQuestionDb,
+  collection,
+  doc,
+  addDoc,
+  setDoc,
+  deleteDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { firestore } from '@/firebase/server-init';
+import {
   getQuestionById,
-  addQuestion,
   getUserById,
 } from './data';
 import { moderateQuestion } from '@/ai/flows/question-moderation-tool';
+
+const questionsCollection = collection(firestore, 'questions');
 
 // --- Question Actions ---
 
@@ -23,7 +30,17 @@ export async function submitQuestion(userId: string, questionText: string) {
         if (!moderationResult.isAppropriate) {
             return { error: `Your question was deemed inappropriate. Reason: ${moderationResult.reason}` };
         }
-        await addQuestion(userId, questionText);
+
+        const newQuestionData = {
+          toUserId: userId,
+          questionText,
+          answerText: null,
+          isAnswered: false,
+          createdAt: serverTimestamp(),
+          answeredAt: null,
+        };
+        await addDoc(questionsCollection, newQuestionData);
+
         const user = await getUserById(userId);
         if (user) revalidatePath(`/u/${user.username}`);
         return { success: true };
@@ -40,7 +57,15 @@ export async function answerQuestion(questionId: string, answerText: string) {
     }
 
     try {
-        const question = await answerQuestionDb(questionId, answerText);
+        const questionRef = doc(questionsCollection, questionId);
+        const updatedData = {
+            answerText,
+            isAnswered: true,
+            answeredAt: serverTimestamp(),
+        };
+        await setDoc(questionRef, updatedData, { merge: true });
+
+        const question = await getQuestionById(questionId);
         if (question) {
             const user = await getUserById(question.toUserId);
             revalidatePath('/dashboard');
@@ -60,7 +85,8 @@ export async function deleteQuestion(questionId: string) {
     }
     try {
         const question = await getQuestionById(questionId);
-        await deleteQuestionDb(questionId);
+        await deleteDoc(doc(questionsCollection, questionId));
+        
         if (question) {
             const user = await getUserById(question.toUserId);
             revalidatePath('/dashboard');

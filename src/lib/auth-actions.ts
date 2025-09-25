@@ -4,13 +4,12 @@ import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
-import {
-  addUser,
-  getUserByUsername,
-} from './data';
+import { getUserByUsername } from './data';
 import { createSession, clearSession } from './auth';
-import { auth } from '@/firebase/server-init';
+import { auth, firestore } from '@/firebase/server-init';
+import type { User } from './types';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -63,8 +62,14 @@ export async function signup(prevState: any, formData: FormData) {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-
-        await addUser({ id: user.uid, email, username });
+        
+        const newUser: Omit<User, 'id'> = {
+          email,
+          username,
+          bio: null,
+          createdAt: new Date(),
+        };
+        await setDoc(doc(firestore, 'users', user.uid), newUser);
         
         const idToken = await user.getIdToken();
         await createSession(user.uid, idToken);
