@@ -10,15 +10,14 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { firestore } from '@/firebase/server-init';
-import { getQuestionById } from './data';
 import { moderateQuestion } from '@/ai/flows/question-moderation-tool';
-import { getUserById } from './auth';
 
 const questionsCollection = collection(firestore, 'questions');
 
 // --- Question Actions ---
 
 export async function submitQuestion(userId: string, questionText: string) {
+  const { getUserById } = await import('./auth');
   if (!userId || !questionText) {
     return { error: 'Invalid input.' };
   }
@@ -49,6 +48,9 @@ export async function submitQuestion(userId: string, questionText: string) {
 }
 
 export async function answerQuestion(questionId: string, answerText: string) {
+  const { getQuestionById } = await import('./data');
+  const { getUserById } = await import('./auth');
+
   if (!questionId || !answerText) {
     return { error: 'Invalid input.' };
   }
@@ -76,6 +78,9 @@ export async function answerQuestion(questionId: string, answerText: string) {
 }
 
 export async function deleteQuestion(questionId: string) {
+  const { getQuestionById } = await import('./data');
+  const { getUserById } = await import('./auth');
+
   if (!questionId) {
     return { error: 'Invalid input.' };
   }
@@ -98,6 +103,7 @@ export async function deleteQuestion(questionId: string) {
 // --- Moderation Action ---
 
 export async function runModeration(questionId: string) {
+  const { getQuestionById } = await import('./data');
   if (!questionId) {
     return { error: 'Invalid question ID.' };
   }

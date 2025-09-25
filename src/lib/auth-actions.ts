@@ -6,10 +6,8 @@ import { revalidatePath } from 'next/cache';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
-import { getUserByUsername } from './auth';
-import { createSession, clearSession } from './auth';
+import { createSession, clearSession, type User } from './auth';
 import { auth, firestore } from '@/firebase/server-init';
-import type { User } from './auth';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -46,6 +44,7 @@ const signupSchema = z.object({
 });
 
 export async function signup(prevState: any, formData: FormData) {
+    const { getUserByUsername } = await import('./auth');
     const validatedFields = signupSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
