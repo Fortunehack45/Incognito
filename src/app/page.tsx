@@ -4,12 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { getAuthenticatedUser } from "@/lib/auth";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Q&A Hub | Where Curiosity Connects",
-  description: "Create a profile, share your link, and let the anonymous questions roll in. Uncover what people are dying to know.",
-};
 
 export default async function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === "hero-questions");
