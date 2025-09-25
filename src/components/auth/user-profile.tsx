@@ -7,10 +7,9 @@ import Link from "next/link";
 import type { User as FirebaseUser } from "firebase/auth";
 import { useDoc } from "@/firebase/firestore/use-doc";
 import { Skeleton } from "../ui/skeleton";
-import type { User as AppUser } from '@/lib/types';
 
 export function UserProfile({ firebaseUser }: { firebaseUser: FirebaseUser }) {
-  const { data: appUser, loading } = useDoc<AppUser>(`users/${firebaseUser.uid}`);
+  const { data: appUser, loading } = useDoc<any>(`users/${firebaseUser.uid}`);
   const avatarImageUrl = "https://images.unsplash.com/photo-1613145997970-db84a7975fbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwcm9maWxlJTIwcGVyc29ufGVufDB8fHx8MTc1ODgxOTAzNXww&ixlib=rb-4.1.0&q=80&w=1080";
 
   if (loading || !appUser) {

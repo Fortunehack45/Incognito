@@ -89,7 +89,7 @@ function AnswerForm({ questionId }: { questionId: string }) {
   );
 }
 
-function QuestionActions({ question }: { question: Question }) {
+function QuestionActions({ question }: { question: any }) {
     const { toast } = useToast();
     const [isDeleting, startDeleteTransition] = useTransition();
     const [isModerating, startModerationTransition] = useTransition();
@@ -172,8 +172,8 @@ const LoadingSkeleton = () => (
 )
 
 
-export function DashboardClient({ user }: { user: User }) {
-  const { data: questions, loading } = useCollection<Question>('questions', {
+export function DashboardClient({ user }: { user: any }) {
+  const { data: questions, loading } = useCollection<any>('questions', {
       where: ['toUserId', '==', user.id],
       orderBy: ['createdAt', 'desc']
   });

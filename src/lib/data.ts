@@ -1,3 +1,5 @@
+'use server';
+
 import {
   collection,
   doc,
@@ -7,15 +9,9 @@ import {
   where,
   orderBy,
   Timestamp,
-  initializeFirestore,
 } from 'firebase/firestore';
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { firebaseConfig } from '@/firebase/config';
+import { firestore } from '@/lib/auth'; // Use the initialized firestore from auth
 import type { Question } from './types';
-
-// This is a server-only file. We need to initialize the app here.
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const firestore = initializeFirestore(app, {});
 
 const questionsCollection = collection(firestore, 'questions');
 

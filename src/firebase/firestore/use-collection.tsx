@@ -2,10 +2,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { onSnapshot, query, collection, where, orderBy, type Query, Timestamp } from 'firebase/firestore';
 import { useFirestore } from '../provider';
-import type { Question } from '@/lib/types';
 
 
-export function useCollection<T extends Question>(collectionPath: string, options?: {
+export function useCollection<T>(collectionPath: string, options?: {
     where?: [string, any, any];
     orderBy?: [string, 'asc' | 'desc'];
 }) {
