@@ -2,8 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { getUserById, type User } from '@/lib/data';
-import { initializeFirebase } from '@/firebase';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import 'server-only';
 
 const SESSION_COOKIE_NAME = 'qa_hub_session';
 
@@ -26,6 +25,7 @@ export async function getAuthenticatedUser(): Promise<User | undefined> {
   try {
     const { userId } = JSON.parse(session);
     if (!userId) return undefined;
+    // In a production app, you'd use the Firebase Admin SDK to verify the idToken
     const user = await getUserById(userId);
     return user;
   } catch (error) {

@@ -2,7 +2,7 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Logo } from "./logo";
-import { logout } from "@/lib/actions";
+import { logout } from "@/lib/auth-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "./ui/dropdown-menu";

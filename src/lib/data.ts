@@ -1,3 +1,5 @@
+import 'server-only';
+
 import {
   collection,
   doc,
@@ -10,13 +12,19 @@ import {
   deleteDoc,
   serverTimestamp,
   orderBy,
+  initializeApp,
+  getApps,
+  getApp,
+  getFirestore,
 } from 'firebase/firestore';
 import type { User, Question } from './types';
-import { initializeFirebase } from '@/firebase';
+import { firebaseConfig } from '@/firebase/config';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
-const { firestore } = initializeFirebase();
+// Initialize Firebase for SERVER-SIDE use only
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const firestore = getFirestore(app);
 
 const usersCollection = collection(firestore, 'users');
 const questionsCollection = collection(firestore, 'questions');
@@ -55,7 +63,6 @@ export async function getUserById(id: string): Promise<User | undefined> {
         operation: 'get',
     });
     errorEmitter.emit('permission-error', permissionError);
-    // We can return undefined here as the listener will throw the error for debugging
     return undefined;
   }
 }
@@ -84,7 +91,7 @@ export async function addQuestion(toUserId: string, questionText: string): Promi
     answeredAt: null,
   };
   
-  const questionRef = addDoc(questionsCollection, newQuestionData)
+  const questionRef = await addDoc(questionsCollection, newQuestionData)
     .catch((serverError) => {
         const permissionError = new FirestorePermissionError({
             path: questionsCollection.path,
@@ -92,13 +99,11 @@ export async function addQuestion(toUserId: string, questionText: string): Promi
             requestResourceData: newQuestionData
         });
         errorEmitter.emit('permission-error', permissionError);
-        throw serverError; // Re-throw to allow the caller to handle it
+        throw serverError;
     });
 
-  // We don't have the server timestamp locally, so we return a Question with a local date for now.
-  // The component will get the real date from the Firestore listener.
   return {
-    id: (await questionRef).id,
+    id: questionRef.id,
     ...newQuestionData,
     createdAt: new Date(),
   } as Question;
@@ -123,7 +128,6 @@ export async function answerQuestion(questionId: string, answerText: string): Pr
         throw serverError;
     });
 
-  // Optimistically return the updated shape.
   const questionDoc = await getDoc(questionRef);
   if (!questionDoc.exists()) return undefined;
 
@@ -133,7 +137,7 @@ export async function answerQuestion(questionId: string, answerText: string): Pr
     ...data,
     ...updatedData,
     createdAt: data.createdAt?.toDate(),
-    answeredAt: new Date(), // Local approximation
+    answeredAt: new Date(),
   } as Question;
 }
 
@@ -154,7 +158,7 @@ export async function addUser(details: Omit<User, 'id' | 'createdAt' | 'bio'> & 
   const newUser: Omit<User, 'id'> = {
     ...rest,
     bio: null,
-    createdAt: new Date(), // This will be converted to a server timestamp if needed.
+    createdAt: new Date(),
   };
   const userRef = doc(usersCollection, id);
 

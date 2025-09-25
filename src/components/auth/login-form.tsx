@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { login } from '@/lib/actions';
+import { login } from '@/lib/auth-actions';
 import { useActionState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -40,7 +40,6 @@ export function LoginForm() {
         variant: 'destructive',
       });
     }
-    // Redirect is handled by the server action
   }, [state, toast]);
 
   return (
