@@ -5,14 +5,23 @@ import {
   getDocs,
   query,
   where,
-  addDoc,
-  setDoc,
-  deleteDoc,
-  serverTimestamp,
   orderBy,
+  Timestamp
 } from 'firebase/firestore';
-import type { User, Question } from './types';
 import { firestore } from '@/firebase/server-init';
+import type { User } from './auth';
+
+// This type is used server-side, keep it here.
+export type Question = {
+  id: string;
+  toUserId: string;
+  questionText: string;
+  answerText: string | null;
+  isAnswered: boolean;
+  createdAt: Date | Timestamp;
+  answeredAt: Date | Timestamp | null;
+};
+
 
 const usersCollection = collection(firestore, 'users');
 const questionsCollection = collection(firestore, 'questions');

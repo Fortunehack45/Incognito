@@ -8,13 +8,15 @@ import Link from "next/link";
 import type { User as FirebaseUser } from "firebase/auth";
 import { useDoc } from "@/firebase";
 import { Skeleton } from "../ui/skeleton";
+import { Timestamp } from "firebase/firestore";
 
-// Duplicating the User type here to avoid importing from a server-only module
+// Define the type directly in the client component to avoid server-only imports
 type AppUser = {
   id: string;
   username: string;
   email: string;
   bio: string | null;
+  createdAt: Date | Timestamp;
 };
 
 export function UserProfile({ firebaseUser }: { firebaseUser: FirebaseUser }) {

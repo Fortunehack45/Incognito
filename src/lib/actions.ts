@@ -12,32 +12,9 @@ import {
 import { firestore } from '@/firebase/server-init';
 import { getQuestionById, getUserById } from './data';
 import { moderateQuestion } from '@/ai/flows/question-moderation-tool';
-import { cookies } from 'next/headers';
-import type { User } from './auth';
-import { SESSION_COOKIE_NAME } from './auth';
+import { getAuthenticatedUser } from './auth';
 
 const questionsCollection = collection(firestore, 'questions');
-
-// --- Auth Actions ---
-
-export async function getAuthenticatedUser(): Promise<User | undefined> {
-  const session = cookies().get(SESSION_COOKIE_NAME)?.value;
-
-  if (!session) {
-    return undefined;
-  }
-
-  try {
-    const { userId } = JSON.parse(session);
-    if (!userId) return undefined;
-    // In a production app, you'd use the Firebase Admin SDK to verify the idToken
-    const user = await getUserById(userId);
-    return user;
-  } catch (error) {
-    console.error('Failed to fetch authenticated user', error);
-    return undefined;
-  }
-}
 
 // --- Question Actions ---
 
@@ -138,3 +115,6 @@ export async function runModeration(questionId: string) {
     return { error: 'Failed to run moderation check.' };
   }
 }
+
+// Re-add getAuthenticatedUser here as it's a server action utility
+export { getAuthenticatedUser };

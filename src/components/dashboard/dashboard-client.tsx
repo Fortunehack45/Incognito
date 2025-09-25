@@ -1,6 +1,6 @@
 'use client';
 
-import type { Question } from "@/lib/types";
+import { Timestamp } from 'firebase/firestore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,25 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "..
 import type { ModerateQuestionOutput } from "@/ai/flows/question-moderation-tool";
 import { useCollection } from "@/firebase";
 import { Skeleton } from "../ui/skeleton";
-import type { User } from "@/lib/auth";
+
+// Define the types directly in the client component to avoid server-only imports
+export type User = {
+  id: string;
+  username: string;
+  email: string;
+  bio: string | null;
+  createdAt: Date | Timestamp;
+};
+
+export type Question = {
+  id: string;
+  toUserId: string;
+  questionText: string;
+  answerText: string | null;
+  isAnswered: boolean;
+  createdAt: Date | Timestamp;
+  answeredAt: Date | Timestamp | null;
+};
 
 const answerSchema = z.object({
   answerText: z.string().min(1, "Answer cannot be empty.").max(1000, "Answer is too long."),
@@ -196,7 +214,7 @@ export function DashboardClient({ user }: { user: User }) {
                                 <div className="flex-1 text-left">
                                     <p className="font-medium">{q.questionText}</p>
                                     <p className="text-sm text-muted-foreground mt-1">
-                                        Received {q.createdAt ? formatDistanceToNow(new Date(q.createdAt), { addSuffix: true }) : ''}
+                                        Received {q.createdAt instanceof Timestamp ? formatDistanceToNow(q.createdAt.toDate(), { addSuffix: true }) : ''}
                                     </p>
                                 </div>
                             </AccordionTrigger>
@@ -228,7 +246,7 @@ export function DashboardClient({ user }: { user: User }) {
                         <CardHeader>
                             <CardTitle className="text-lg font-normal">{q.questionText}</CardTitle>
                             <CardDescription>
-                                Asked {q.createdAt ? formatDistanceToNow(new Date(q.createdAt), { addSuffix: true }) : ''}
+                                Asked {q.createdAt instanceof Timestamp ? formatDistanceToNow(q.createdAt.toDate(), { addSuffix: true }) : ''}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -236,7 +254,7 @@ export function DashboardClient({ user }: { user: User }) {
                         </CardContent>
                         <CardFooter className="flex justify-between items-center">
                             <p className="text-xs text-muted-foreground">
-                                Answered {q.answeredAt ? formatDistanceToNow(new Date(q.answeredAt), { addSuffix: true }) : ''}
+                                Answered {q.answeredAt instanceof Timestamp ? formatDistanceToNow(q.answeredAt.toDate(), { addSuffix: true }) : ''}
                             </p>
                             <QuestionActions question={q} />
                         </CardFooter>
