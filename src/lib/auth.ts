@@ -4,14 +4,10 @@ import { cookies } from 'next/headers';
 import { SESSION_COOKIE_NAME } from './constants';
 import type { User } from './types';
 import admin from 'firebase-admin';
-import { firebaseConfig } from '@/firebase/config';
 
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
-    databaseURL: `https://${firebaseConfig.projectId}.firebaseio.com`
-  });
+  admin.initializeApp();
 }
 
 const firestore = admin.firestore();
