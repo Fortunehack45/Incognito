@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
 import { useUser } from "@/firebase/auth/use-user";
@@ -60,12 +60,10 @@ export default function DashboardPage() {
     return redirect("/login");
   }
 
-  // Now, if we have a firebaseUser but are waiting for the appUser doc
   if (loadingUser) {
      return <DashboardSkeleton />;
   }
   
-  // If we have a firebase user, but couldn't find their document after loading.
   if (!appUser) {
     return (
        <div className="container mx-auto px-4 py-8">

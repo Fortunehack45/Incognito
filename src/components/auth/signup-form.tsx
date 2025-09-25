@@ -44,11 +44,10 @@ export function SignupForm() {
         const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
         const user = userCredential.user;
         
-        // Ensure the user document is created before proceeding
         const newUser = {
           email: values.email,
           username: values.username,
-          bio: '', // Initialize with empty string
+          bio: '',
           createdAt: new Date(),
         };
         await setDoc(doc(firestore, 'users', user.uid), newUser);
@@ -65,15 +64,17 @@ export function SignupForm() {
         formAction(formData);
 
       } catch (error: any) {
+        let description = 'An unknown error occurred during signup.';
         if (error.code === 'auth/email-already-in-use') {
-          toast({ title: 'Signup Failed', description: 'An account with this email already exists.', variant: 'destructive' });
-        } else {
-          toast({ title: 'Signup Failed', description: 'An unknown error occurred during signup.', variant: 'destructive' });
+          description = 'An account with this email already exists.';
+        } else if (state?.error) {
+          // This will catch the username already taken error from the server action
+          description = state.error;
         }
+        toast({ title: 'Signup Failed', description, variant: 'destructive' });
       }
     });
   };
-
 
   useEffect(() => {
     if (state?.error) {

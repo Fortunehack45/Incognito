@@ -83,11 +83,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
     );
   }
 
-  if (!user) {
-    notFound();
-  }
-
-
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
       <div className="space-y-8">

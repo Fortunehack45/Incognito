@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FirebaseProvider } from "@/firebase/provider";
 import { Header } from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
 import { Skeleton } from "./ui/skeleton";
+import { useEffect, useState } from "react";
 
 function AppSkeleton() {
     return (
@@ -32,6 +32,7 @@ function AppSkeleton() {
         </div>
     )
 }
+
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = useState(false);
