@@ -9,6 +9,8 @@ import { useUser } from "@/firebase/auth/use-user";
 import { useDoc } from "@/firebase/firestore/use-doc";
 import type { User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
 
 function DashboardSkeleton() {
     return (
@@ -47,21 +49,36 @@ function DashboardSkeleton() {
 
 export default function DashboardPage() {
   const { user: firebaseUser, loading: loadingAuth } = useUser();
-  const { data: appUser, loading: loadingUser } = useDoc<User>(firebaseUser ? `users/${firebaseUser.uid}` : '');
+  const docPath = firebaseUser ? `users/${firebaseUser.uid}` : '';
+  const { data: appUser, loading: loadingUser } = useDoc<User>(docPath);
   
-  if (loadingAuth || loadingUser) {
+  if (loadingAuth) {
     return <DashboardSkeleton />;
   }
 
   if (!firebaseUser) {
-    redirect("/login");
-  }
-  
-  if (!appUser) {
-    // This case might happen briefly or if there's a data consistency issue
-    return <DashboardSkeleton />;
+    return redirect("/login");
   }
 
+  // Now, if we have a firebaseUser but are waiting for the appUser doc
+  if (loadingUser) {
+     return <DashboardSkeleton />;
+  }
+  
+  // If we have a firebase user, but couldn't find their document after loading.
+  if (!appUser) {
+    return (
+       <div className="container mx-auto px-4 py-8">
+          <Alert variant="destructive">
+            <Terminal className="h-4 w-4" />
+            <AlertTitle>Error Loading User Profile</AlertTitle>
+            <AlertDescription>
+              We couldn't find your user profile data in the database. This might be due to a sign-up issue. Please try logging out and signing up again.
+            </AlertDescription>
+          </Alert>
+       </div>
+    )
+  }
 
   const profileUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/u/${appUser.username}`;
 
