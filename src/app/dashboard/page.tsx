@@ -1,11 +1,11 @@
 import { getAuthenticatedUser } from "@/lib/auth";
-import { getQuestionsForUser } from "@/lib/data";
 import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Copy } from "lucide-react";
+import { CopyButton } from "@/components/copy-button";
 
 export default async function DashboardPage() {
   const user = await getAuthenticatedUser();
@@ -14,10 +14,6 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const questions = await getQuestionsForUser(user.id);
-  const unansweredQuestions = questions.filter((q) => !q.isAnswered);
-  const answeredQuestions = questions.filter((q) => q.isAnswered);
-  
   const profileUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002'}/u/${user.username}`;
 
 
@@ -36,18 +32,11 @@ export default async function DashboardPage() {
                     {profileUrl}
                  </Link>
              </div>
-             {/* Not implemented: client component with navigator.clipboard */}
-             <Button variant="ghost" size="icon" disabled>
-                 <Copy className="h-4 w-4" />
-             </Button>
+             <CopyButton textToCopy={profileUrl} />
           </Card>
         </div>
 
-        <DashboardClient
-          unansweredQuestions={unansweredQuestions}
-          answeredQuestions={answeredQuestions}
-          user={user}
-        />
+        <DashboardClient user={user} />
       </div>
     </div>
   );

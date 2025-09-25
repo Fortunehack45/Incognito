@@ -9,8 +9,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { login } from '@/lib/actions';
 import { useFormState } from 'react-dom';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -21,8 +22,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function LoginForm() {
   const { toast } = useToast();
-  const [pending, setPending] = useState(false);
   const [state, formAction] = useFormState(login, null);
+  const router = useRouter();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -34,33 +35,19 @@ export function LoginForm() {
 
   useEffect(() => {
     if (state?.error) {
+      form.formState.isSubmitting && form.reset(undefined, { keepValues: true });
       toast({
         title: 'Login Failed',
         description: state.error,
         variant: 'destructive',
       });
     }
-    if (state?.success) {
-      toast({
-        title: 'Login Successful',
-        description: 'Welcome back!',
-      });
-      // Redirect is handled by the server action
-    }
-  }, [state, toast]);
-
-  const onSubmit = (data: FormValues) => {
-    setPending(true);
-    formAction(new FormData(form.control.formRef.current!));
-    // The useFormState hook will handle the result. Let's just manage the pending state.
-    // The timeout is a bit of a hack to ensure the state has time to update if the action is very fast.
-    setTimeout(() => setPending(false), 500); 
-  };
-
+    // Redirect is handled by the server action
+  }, [state, toast, form]);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form action={formAction} className="space-y-4">
         <FormField
           control={form.control}
           name="email"
@@ -87,8 +74,8 @@ export function LoginForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting || pending}>
-          { (form.formState.isSubmitting || pending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+          { form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Log In
         </Button>
       </form>

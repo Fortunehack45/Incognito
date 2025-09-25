@@ -3,18 +3,22 @@
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 import {
   addUser,
   answerQuestion as answerQuestionDb,
   deleteQuestion as deleteQuestionDb,
-  getUserByEmail,
   getUserByUsername,
   getQuestionById,
   addQuestion,
+  getUserByEmail
 } from './data';
 import { createSession, clearSession } from './auth';
 import { moderateQuestion } from '@/ai/flows/question-moderation-tool';
+import { initializeFirebase } from '@/firebase';
+
+const { auth } = initializeFirebase();
 
 // --- Auth Actions ---
 
@@ -32,14 +36,14 @@ export async function login(prevState: any, formData: FormData) {
 
   const { email, password } = validatedFields.data;
   
-  // In a real app, you'd verify the password hash
-  const user = await getUserByEmail(email);
-
-  if (!user) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    const idToken = await user.getIdToken();
+    await createSession(user.uid, idToken);
+  } catch (error: any) {
     return { error: 'Invalid email or password.' };
   }
-  
-  await createSession(user.id);
 
   revalidatePath('/');
   redirect('/dashboard');
@@ -61,20 +65,26 @@ export async function signup(prevState: any, formData: FormData) {
     
     const { email, username, password } = validatedFields.data;
 
-    const existingUserByEmail = await getUserByEmail(email);
-    if (existingUserByEmail) {
-        return { error: 'An account with this email already exists.' };
-    }
-
     const existingUserByUsername = await getUserByUsername(username);
     if (existingUserByUsername) {
         return { error: 'This username is already taken.' };
     }
 
-    // In a real app, you'd hash the password
-    const newUser = await addUser({ email, username });
-    
-    await createSession(newUser.id);
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        await addUser({ id: user.uid, email, username });
+        
+        const idToken = await user.getIdToken();
+        await createSession(user.uid, idToken);
+    } catch (error: any) {
+        if (error.code === 'auth/email-already-in-use') {
+            return { error: 'An account with this email already exists.' };
+        }
+        console.error('Signup error:', error);
+        return { error: 'Failed to create an account.' };
+    }
     
     revalidatePath('/');
     redirect('/dashboard');
@@ -83,6 +93,7 @@ export async function signup(prevState: any, formData: FormData) {
 
 export async function logout() {
   await clearSession();
+  revalidatePath('/');
   redirect('/login');
 }
 
@@ -94,8 +105,13 @@ export async function submitQuestion(userId: string, questionText: string) {
     }
 
     try {
+        const moderationResult = await moderateQuestion({ questionText });
+        if (!moderationResult.isAppropriate) {
+            return { error: `Your question was deemed inappropriate. Reason: ${moderationResult.reason}` };
+        }
         await addQuestion(userId, questionText);
-        revalidatePath(`/u/${userId}`);
+        const user = await getUserById(userId);
+        if (user) revalidatePath(`/u/${user.username}`);
         return { success: true };
     } catch (error) {
         return { error: 'Failed to submit question.' };
@@ -111,7 +127,7 @@ export async function answerQuestion(questionId: string, answerText: string) {
     try {
         const question = await answerQuestionDb(questionId, answerText);
         if (question) {
-            const user = await getUserByUsername(question.toUserId);
+            const user = await getUserById(question.toUserId);
             revalidatePath('/dashboard');
             if(user) revalidatePath(`/u/${user.username}`);
         }
@@ -130,7 +146,7 @@ export async function deleteQuestion(questionId: string) {
         const question = await getQuestionById(questionId);
         await deleteQuestionDb(questionId);
         if (question) {
-            const user = await getUserByUsername(question.toUserId);
+            const user = await getUserById(question.toUserId);
             revalidatePath('/dashboard');
             if (user) revalidatePath(`/u/${user.username}`);
         }

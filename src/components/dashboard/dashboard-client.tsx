@@ -3,7 +3,6 @@
 import type { Question, User } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
@@ -13,8 +12,8 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
 import { answerQuestion, deleteQuestion, runModeration } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { Bot, Edit, Loader2, ShieldCheck, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Bot, Loader2, ShieldCheck, Trash2 } from "lucide-react";
+import { useState, useTransition } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +26,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import type { ModerateQuestionOutput } from "@/ai/flows/question-moderation-tool";
+import { useCollection } from "@/firebase";
+import { Skeleton } from "../ui/skeleton";
 
 const answerSchema = z.object({
   answerText: z.string().min(1, "Answer cannot be empty.").max(1000, "Answer is too long."),
@@ -34,23 +35,22 @@ const answerSchema = z.object({
 
 function AnswerForm({ questionId }: { questionId: string }) {
   const { toast } = useToast();
-  const [isPending, setIsPending] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const form = useForm({
     resolver: zodResolver(answerSchema),
     defaultValues: { answerText: "" },
   });
 
   async function onSubmit(values: z.infer<typeof answerSchema>) {
-    setIsPending(true);
-    const result = await answerQuestion(questionId, values.answerText);
-    setIsPending(false);
-
-    if (result.error) {
-      toast({ title: "Error", description: result.error, variant: "destructive" });
-    } else {
-      toast({ title: "Success", description: "Your answer has been published." });
-      form.reset();
-    }
+    startTransition(async () => {
+      const result = await answerQuestion(questionId, values.answerText);
+      if (result.error) {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+      } else {
+        toast({ title: "Success", description: "Your answer has been published." });
+        form.reset();
+      }
+    });
   }
 
   return (
@@ -79,32 +79,32 @@ function AnswerForm({ questionId }: { questionId: string }) {
 
 function QuestionActions({ question }: { question: Question }) {
     const { toast } = useToast();
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [isModerating, setIsModerating] = useState(false);
+    const [isDeleting, startDeleteTransition] = useTransition();
+    const [isModerating, startModerationTransition] = useTransition();
     const [moderationResult, setModerationResult] = useState<ModerateQuestionOutput | null>(null);
     const [showModerationDialog, setShowModerationDialog] = useState(false);
 
     const handleDelete = async () => {
-        setIsDeleting(true);
-        const result = await deleteQuestion(question.id);
-        setIsDeleting(false);
-        if (result.error) {
-            toast({ title: "Error", description: result.error, variant: "destructive" });
-        } else {
-            toast({ title: "Success", description: "Question deleted." });
-        }
+        startDeleteTransition(async () => {
+            const result = await deleteQuestion(question.id);
+            if (result.error) {
+                toast({ title: "Error", description: result.error, variant: "destructive" });
+            } else {
+                toast({ title: "Success", description: "Question deleted." });
+            }
+        });
     };
     
     const handleModeration = async () => {
-        setIsModerating(true);
-        const result = await runModeration(question.id);
-        setIsModerating(false);
-        if (result.error) {
-            toast({ title: "Moderation Error", description: result.error, variant: "destructive" });
-        } else if (result.data) {
-            setModerationResult(result.data);
-            setShowModerationDialog(true);
-        }
+        startModerationTransition(async () => {
+            const result = await runModeration(question.id);
+            if (result.error) {
+                toast({ title: "Moderation Error", description: result.error, variant: "destructive" });
+            } else if (result.data) {
+                setModerationResult(result.data);
+                setShowModerationDialog(true);
+            }
+        });
     }
 
     return (
@@ -146,9 +146,26 @@ function QuestionActions({ question }: { question: Question }) {
     );
 }
 
+const LoadingSkeleton = () => (
+    <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+            <div key={i} className="p-4 border rounded-lg">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/4" />
+            </div>
+        ))}
+    </div>
+)
 
-export function DashboardClient({ unansweredQuestions, answeredQuestions, user }: { unansweredQuestions: Question[], answeredQuestions: Question[], user: User }) {
-  const { toast } = useToast();
+
+export function DashboardClient({ user }: { user: User }) {
+  const { data: questions, loading } = useCollection<Question>('questions', {
+      where: ['toUserId', '==', user.id],
+      orderBy: ['createdAt', 'desc']
+  });
+
+  const unansweredQuestions = questions?.filter(q => !q.isAnswered) || [];
+  const answeredQuestions = questions?.filter(q => q.isAnswered) || [];
 
   const EmptyState = ({ title, description }: { title: string, description: string }) => (
     <div className="text-center py-16 px-4">
@@ -170,7 +187,7 @@ export function DashboardClient({ unansweredQuestions, answeredQuestions, user }
             <CardDescription>Answer these questions to have them appear on your public profile.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {unansweredQuestions.length > 0 ? (
+            {loading ? <LoadingSkeleton /> : unansweredQuestions.length > 0 ? (
                 <Accordion type="single" collapsible className="w-full">
                     {unansweredQuestions.map((q) => (
                          <AccordionItem value={q.id} key={q.id} className="border rounded-lg px-4 bg-secondary/50">
@@ -178,7 +195,7 @@ export function DashboardClient({ unansweredQuestions, answeredQuestions, user }
                                 <div className="flex-1 text-left">
                                     <p className="font-medium">{q.questionText}</p>
                                     <p className="text-sm text-muted-foreground mt-1">
-                                        Received {formatDistanceToNow(q.createdAt, { addSuffix: true })}
+                                        Received {q.createdAt ? formatDistanceToNow(new Date(q.createdAt), { addSuffix: true }) : ''}
                                     </p>
                                 </div>
                             </AccordionTrigger>
@@ -204,13 +221,13 @@ export function DashboardClient({ unansweredQuestions, answeredQuestions, user }
             <CardDescription>These are publicly visible on your profile.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {answeredQuestions.length > 0 ? (
+            {loading ? <LoadingSkeleton /> : answeredQuestions.length > 0 ? (
                 answeredQuestions.map((q) => (
                     <Card key={q.id} className="bg-secondary/50">
                         <CardHeader>
                             <CardTitle className="text-lg font-normal">{q.questionText}</CardTitle>
                             <CardDescription>
-                                Asked {formatDistanceToNow(q.createdAt, { addSuffix: true })}
+                                Asked {q.createdAt ? formatDistanceToNow(new Date(q.createdAt), { addSuffix: true }) : ''}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -218,7 +235,7 @@ export function DashboardClient({ unansweredQuestions, answeredQuestions, user }
                         </CardContent>
                         <CardFooter className="flex justify-between items-center">
                             <p className="text-xs text-muted-foreground">
-                                Answered {q.answeredAt ? formatDistanceToNow(q.answeredAt, { addSuffix: true }) : ''}
+                                Answered {q.answeredAt ? formatDistanceToNow(new Date(q.answeredAt), { addSuffix: true }) : ''}
                             </p>
                             <QuestionActions question={q} />
                         </CardFooter>
