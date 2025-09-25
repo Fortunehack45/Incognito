@@ -1,4 +1,5 @@
-import { getUserByUsername, getQuestionsForUser } from "@/lib/data";
+import { getQuestionsForUser } from "@/lib/data";
+import { getUserByUsername } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";

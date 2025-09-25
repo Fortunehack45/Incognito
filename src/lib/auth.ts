@@ -1,9 +1,9 @@
 'use server';
 
-import { Timestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import { cookies } from 'next/headers';
 import { SESSION_COOKIE_NAME } from './constants';
-import { getUserById } from './data';
+import { firestore } from '@/firebase/server-init';
 
 // This type is now defined directly in the auth file
 export type User = {
@@ -25,6 +25,27 @@ export async function createSession(userId: string, idToken: string) {
 
 export async function clearSession() {
   cookies().delete(SESSION_COOKIE_NAME);
+}
+
+const usersCollection = collection(firestore, 'users');
+
+export async function getUserById(id: string): Promise<User | undefined> {
+  const userDocRef = doc(usersCollection, id);
+  const userDoc = await getDoc(userDocRef);
+  if (!userDoc.exists()) {
+    return undefined;
+  }
+  return { id: userDoc.id, ...userDoc.data() } as User;
+}
+
+export async function getUserByUsername(username: string): Promise<User | undefined> {
+  const q = query(usersCollection, where('username', '==', username));
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.empty) {
+    return undefined;
+  }
+  const userDoc = querySnapshot.docs[0];
+  return { id: userDoc.id, ...userDoc.data() } as User;
 }
 
 export async function getAuthenticatedUser(): Promise<User | undefined> {

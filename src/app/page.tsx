@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Link from "next/link";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { getAuthenticatedUser } from "@/lib/actions";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 export default async function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === "hero-questions");

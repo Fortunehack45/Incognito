@@ -9,7 +9,6 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { firestore } from '@/firebase/server-init';
-import type { User } from './auth';
 
 // This type is used server-side, keep it here.
 export type Question = {
@@ -23,27 +22,7 @@ export type Question = {
 };
 
 
-const usersCollection = collection(firestore, 'users');
 const questionsCollection = collection(firestore, 'questions');
-
-export async function getUserByUsername(username: string): Promise<User | undefined> {
-  const q = query(usersCollection, where('username', '==', username));
-  const querySnapshot = await getDocs(q);
-  if (querySnapshot.empty) {
-    return undefined;
-  }
-  const userDoc = querySnapshot.docs[0];
-  return { id: userDoc.id, ...userDoc.data() } as User;
-}
-
-export async function getUserById(id: string): Promise<User | undefined> {
-  const userDocRef = doc(usersCollection, id);
-  const userDoc = await getDoc(userDocRef);
-  if (!userDoc.exists()) {
-    return undefined;
-  }
-  return { id: userDoc.id, ...userDoc.data() } as User;
-}
 
 export async function getQuestionsForUser(userId: string): Promise<Question[]> {
   const q = query(questionsCollection, where('toUserId', '==', userId), orderBy('createdAt', 'desc'));

@@ -10,9 +10,9 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { firestore } from '@/firebase/server-init';
-import { getQuestionById, getUserById } from './data';
+import { getQuestionById } from './data';
 import { moderateQuestion } from '@/ai/flows/question-moderation-tool';
-import { getAuthenticatedUser } from './auth';
+import { getUserById } from './auth';
 
 const questionsCollection = collection(firestore, 'questions');
 
@@ -115,6 +115,3 @@ export async function runModeration(questionId: string) {
     return { error: 'Failed to run moderation check.' };
   }
 }
-
-// Re-add getAuthenticatedUser here as it's a server action utility
-export { getAuthenticatedUser };

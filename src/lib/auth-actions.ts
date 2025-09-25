@@ -6,10 +6,10 @@ import { revalidatePath } from 'next/cache';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
-import { getUserByUsername } from './data';
+import { getUserByUsername } from './auth';
 import { createSession, clearSession } from './auth';
 import { auth, firestore } from '@/firebase/server-init';
-import type { User } from './types';
+import type { User } from './auth';
 
 const loginSchema = z.object({
   email: z.string().email(),
