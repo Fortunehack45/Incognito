@@ -36,8 +36,8 @@ export async function revalidateAnswer(questionId: string) {
   const question = await getQuestionById(questionId);
   if (question) {
     const user = await getUserById(question.toUserId);
+    if(user) revalidatePath(`/u/${user.username}`);
     revalidatePath('/dashboard');
-    if (user) revalidatePath(`/u/${user.username}`);
   }
   return { success: true };
 }
@@ -50,8 +50,8 @@ export async function revalidateDelete(questionId: string) {
     const question = await getQuestionById(questionId);
     if (question) {
       const user = await getUserById(question.toUserId);
+      if(user) revalidatePath(`/u/${user.username}`);
       revalidatePath('/dashboard');
-      if (user) revalidatePath(`/u/${user.username}`);
     }
     return { success: true };
   } catch (error) {

@@ -1,17 +1,20 @@
+'use client';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
-import { getAuthenticatedUser } from "@/lib/auth";
+import { useUser } from "@/firebase/auth/use-user";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default async function Home() {
+export default function Home() {
   const heroImage = {
       "id": "hero-questions",
       "description": "An abstract image representing questions and curiosity",
       "imageUrl": "https://images.unsplash.com/photo-1699993131854-a1cde51ce9da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMHF1ZXN0aW9ufGVufDB8fHx8MTc1ODgzMDI2MHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "abstract question"
     };
-  const user = await getAuthenticatedUser();
+  const { user, loading } = useUser();
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-16">
@@ -24,7 +27,12 @@ export default async function Home() {
             Create a profile, share your link, and let the anonymous questions roll in. Uncover what people are dying to know.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            {user ? (
+            {loading ? (
+              <>
+                <Skeleton className="h-12 w-48" />
+                <Skeleton className="h-12 w-24" />
+              </>
+            ) : user ? (
               <Button asChild size="lg" className="text-lg">
                 <Link href="/dashboard">Go to Your Dashboard</Link>
               </Button>

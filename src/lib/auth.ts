@@ -52,26 +52,3 @@ export async function getUserByUsername(username: string): Promise<User | undefi
   const userDoc = querySnapshot.docs[0];
   return { id: userDoc.id, ...userDoc.data() } as User;
 }
-
-export async function getAuthenticatedUser(): Promise<User | undefined> {
-  const sessionCookie = cookies().get(SESSION_COOKIE_NAME)?.value;
-
-  if (!sessionCookie) {
-    return undefined;
-  }
-
-  try {
-    const { userId } = JSON.parse(sessionCookie);
-    if (!userId) return undefined;
-    
-    // This call is the source of the server error. We'll rely on the client to fetch user data.
-    // For session validation, we'll trust the cookie for now.
-    // In a real app, you would verify the session cookie/token here with the Admin SDK.
-    const user = await getUserById(userId);
-    return user;
-
-  } catch (error) {
-    console.error("Error getting authenticated user:", error);
-    return undefined;
-  }
-}
