@@ -1,7 +1,9 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { onSnapshot, query, collection, where, orderBy, type Query } from 'firebase/firestore';
+import { onSnapshot, query, collection, where, orderBy, type Query, getDocs } from 'firebase/firestore';
 import { useFirestore } from '../provider';
+import { errorEmitter } from '../error-emitter';
+import { FirestorePermissionError } from '../errors';
 
 export function useCollection<T>(collectionPath: string, options?: {
     where?: [string, any, any];
@@ -10,9 +12,13 @@ export function useCollection<T>(collectionPath: string, options?: {
     const firestore = useFirestore();
     const [data, setData] = useState<T[] | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+    
+    // We don't store the error in state, we throw it via the listener
+    // to make it visible in the dev overlay.
+    // const [error, setError] = useState<Error | null>(null);
 
     const memoizedQuery = useMemo(() => {
+        if (!firestore) return null;
         let q: Query = collection(firestore, collectionPath);
         if (options?.where) {
             q = query(q, where(...options.where));
@@ -25,6 +31,8 @@ export function useCollection<T>(collectionPath: string, options?: {
 
 
     useEffect(() => {
+        if (!memoizedQuery) return;
+
         const unsubscribe = onSnapshot(
             memoizedQuery,
             (querySnapshot) => {
@@ -33,14 +41,17 @@ export function useCollection<T>(collectionPath: string, options?: {
                 setLoading(false);
             },
             (err) => {
-                console.error(err);
-                setError(err);
+                const permissionError = new FirestorePermissionError({
+                    path: collectionPath,
+                    operation: 'list',
+                });
+                errorEmitter.emit('permission-error', permissionError);
                 setLoading(false);
             }
         );
 
         return () => unsubscribe();
-    }, [memoizedQuery]);
+    }, [memoizedQuery, collectionPath]);
 
-    return { data, loading, error };
+    return { data, loading };
 }
