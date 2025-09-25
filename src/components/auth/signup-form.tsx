@@ -8,8 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { signup } from '@/lib/actions';
-import { useFormState } from 'react-dom';
-import { useEffect } from 'react';
+import { useActionState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
@@ -22,7 +21,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function SignupForm() {
   const { toast } = useToast();
-  const [state, formAction] = useFormState(signup, null);
+  const [state, formAction, isPending] = useActionState(signup, null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -35,7 +34,6 @@ export function SignupForm() {
 
   useEffect(() => {
     if (state?.error) {
-      form.formState.isSubmitting && form.reset(undefined, { keepValues: true });
       toast({
         title: 'Signup Failed',
         description: state.error,
@@ -43,7 +41,7 @@ export function SignupForm() {
       });
     }
     // Redirect is handled by the server action
-  }, [state, toast, form]);
+  }, [state, toast]);
 
   return (
     <Form {...form}>
@@ -87,8 +85,8 @@ export function SignupForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-          { form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        <Button type="submit" className="w-full" disabled={isPending}>
+          { isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Sign Up
         </Button>
       </form>
