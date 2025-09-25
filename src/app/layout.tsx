@@ -1,10 +1,46 @@
-
 "use client"
 import "./globals.css";
 import { Header } from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FirebaseProvider } from "@/firebase/provider";
+import { useEffect, useState } from "react";
+
+function Providers({ children }: { children: React.ReactNode }) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    // On the server or first client render, render a basic layout
+    // to avoid mismatch. Skeletons could be used here.
+    return (
+       <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <ThemeProvider>
+      <FirebaseProvider>
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-grow">
+            {children}
+          </main>
+        </div>
+        <Toaster />
+      </FirebaseProvider>
+    </ThemeProvider>
+  );
+}
+
 
 export default function RootLayout({
   children,
@@ -21,17 +57,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased h-full">
-        <ThemeProvider>
-          <FirebaseProvider>
-            <div className="flex flex-col min-h-screen">
-              <Header />
-              <main className="flex-grow">
-                {children}
-              </main>
-            </div>
-            <Toaster />
-          </FirebaseProvider>
-        </ThemeProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
