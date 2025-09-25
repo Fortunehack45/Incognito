@@ -2,16 +2,32 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { logout } from "@/lib/auth-actions";
 import Link from "next/link";
 import type { User as FirebaseUser } from "firebase/auth";
 import { useDoc } from "@/firebase/firestore/use-doc";
 import { Skeleton } from "../ui/skeleton";
 import type { User } from "@/lib/types";
+import { useAuth } from "@/firebase/provider";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 export function UserProfile({ firebaseUser }: { firebaseUser: FirebaseUser }) {
   const { data: appUser, loading } = useDoc<User>(`users/${firebaseUser.uid}`);
+  const auth = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
   const avatarImageUrl = "https://images.unsplash.com/photo-1613145997970-db84a7975fbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwcm9maWxlJTIwcGVyc29ufGVufDB8fHx8MTc1ODgxOTAzNXww&ixlib=rb-4.1.0&q=80&w=1080";
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({ title: "Logged out successfully."});
+      router.push('/login');
+    } catch (error) {
+      toast({ title: "Logout Failed", description: "An error occurred during logout.", variant: "destructive" });
+    }
+  };
 
   if (loading || !appUser) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
@@ -46,13 +62,9 @@ export function UserProfile({ firebaseUser }: { firebaseUser: FirebaseUser }) {
           <Link href={`/u/${appUser.username}`}>Public Profile</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-         <form action={logout} className="w-full">
-          <button type="submit" className="w-full">
-            <DropdownMenuItem>
-              Log out
-            </DropdownMenuItem>
-          </button>
-        </form>
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+          Log out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { login } from '@/lib/auth-actions';
-import { useActionState, useEffect, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
 import { Loader2 } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useAuth } from '@/firebase/provider';
@@ -22,7 +22,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function LoginForm() {
   const { toast } = useToast();
-  const [state, formAction] = useActionState(login, null);
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const auth = useAuth();
 
@@ -37,16 +37,9 @@ export function LoginForm() {
   const onSubmit = async (values: FormValues) => {
     startTransition(async () => {
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-        const idToken = await userCredential.user.getIdToken();
-        const formData = new FormData();
-        formData.append('email', values.email);
-        formData.append('password', values.password);
-        formData.append('uid', userCredential.user.uid);
-        formData.append('idToken', idToken);
-        
-        formAction(formData);
-
+        await signInWithEmailAndPassword(auth, values.email, values.password);
+        toast({ title: 'Login Successful!'});
+        router.push('/dashboard');
       } catch (error: any) {
         toast({
           title: 'Login Failed',
@@ -56,16 +49,6 @@ export function LoginForm() {
       }
     });
   };
-
-  useEffect(() => {
-    if (state?.error) {
-      toast({
-        title: 'Login Failed',
-        description: state.error,
-        variant: 'destructive',
-      });
-    }
-  }, [state, toast]);
 
   return (
     <Form {...form}>

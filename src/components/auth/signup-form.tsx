@@ -7,12 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { signup } from '@/lib/auth-actions';
-import { useActionState, useEffect, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
 import { Loader2 } from 'lucide-react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useAuth, useFirestore } from '@/firebase/provider';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
 
 const formSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters.').max(20, 'Username must be at most 20 characters.').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores.'),
@@ -24,7 +24,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function SignupForm() {
   const { toast } = useToast();
-  const [state, formAction] = useActionState(signup, null);
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const auth = useAuth();
   const firestore = useFirestore();
@@ -41,10 +41,23 @@ export function SignupForm() {
   const onSubmit = async (values: FormValues) => {
     startTransition(async () => {
       try {
+        // 1. Check if username is already taken
+        const usersRef = collection(firestore, 'users');
+        const q = query(usersRef, where('username', '==', values.username));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          toast({ title: 'Signup Failed', description: 'This username is already taken. Please choose another.', variant: 'destructive' });
+          return;
+        }
+
+        // 2. Create user with email and password
         const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
         const user = userCredential.user;
         
+        // 3. Create user profile document in Firestore
         const newUser = {
+          id: user.uid,
           email: values.email,
           username: values.username,
           bio: '',
@@ -52,39 +65,18 @@ export function SignupForm() {
         };
         await setDoc(doc(firestore, 'users', user.uid), newUser);
         
-        const idToken = await user.getIdToken();
-        
-        const formData = new FormData();
-        formData.append('username', values.username);
-        formData.append('email', values.email);
-        formData.append('password', values.password);
-        formData.append('uid', user.uid);
-        formData.append('idToken', idToken);
-        
-        formAction(formData);
+        toast({ title: "Success!", description: "Your account has been created."});
+        router.push('/dashboard');
 
       } catch (error: any) {
         let description = 'An unknown error occurred during signup.';
         if (error.code === 'auth/email-already-in-use') {
           description = 'An account with this email already exists.';
-        } else if (state?.error) {
-          // This will catch the username already taken error from the server action
-          description = state.error;
         }
         toast({ title: 'Signup Failed', description, variant: 'destructive' });
       }
     });
   };
-
-  useEffect(() => {
-    if (state?.error) {
-      toast({
-        title: 'Signup Failed',
-        description: state.error,
-        variant: 'destructive',
-      });
-    }
-  }, [state, toast]);
 
   return (
     <Form {...form}>

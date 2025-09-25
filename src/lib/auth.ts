@@ -1,7 +1,5 @@
 'use server';
 
-import { cookies } from 'next/headers';
-import { SESSION_COOKIE_NAME } from './constants';
 import type { User } from './types';
 import admin from 'firebase-admin';
 
@@ -11,26 +9,6 @@ if (!admin.apps.length) {
 }
 
 const firestore = admin.firestore();
-
-export async function createSession(userId: string, idToken: string) {
-  // In a real app, you would verify the idToken here using the Admin SDK.
-  // For this starter, we'll trust the client and just set the cookie.
-  // const decodedToken = await admin.auth().verifyIdToken(idToken);
-  // if (decodedToken.uid !== userId) {
-  //   throw new Error("Token UID does not match provided user ID");
-  // }
-  
-  cookies().set(SESSION_COOKIE_NAME, JSON.stringify({ userId }), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 60 * 60 * 24 * 7, // One week
-    path: '/',
-  });
-}
-
-export async function clearSession() {
-  cookies().delete(SESSION_COOKIE_NAME);
-}
 
 const usersCollection = firestore.collection('users');
 
