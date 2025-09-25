@@ -1,0 +1,235 @@
+'use client';
+
+import type { Question, User } from "@/lib/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form";
+import { answerQuestion, deleteQuestion, runModeration } from "@/lib/actions";
+import { useToast } from "@/hooks/use-toast";
+import { formatDistanceToNow } from "date-fns";
+import { Bot, Edit, Loader2, ShieldCheck, Trash2 } from "lucide-react";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
+import type { ModerateQuestionOutput } from "@/ai/flows/question-moderation-tool";
+
+const answerSchema = z.object({
+  answerText: z.string().min(1, "Answer cannot be empty.").max(1000, "Answer is too long."),
+});
+
+function AnswerForm({ questionId }: { questionId: string }) {
+  const { toast } = useToast();
+  const [isPending, setIsPending] = useState(false);
+  const form = useForm({
+    resolver: zodResolver(answerSchema),
+    defaultValues: { answerText: "" },
+  });
+
+  async function onSubmit(values: z.infer<typeof answerSchema>) {
+    setIsPending(true);
+    const result = await answerQuestion(questionId, values.answerText);
+    setIsPending(false);
+
+    if (result.error) {
+      toast({ title: "Error", description: result.error, variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: "Your answer has been published." });
+      form.reset();
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="answerText"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Textarea placeholder="Write your answer here..." {...field} className="bg-background" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" disabled={isPending}>
+          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Publish Answer
+        </Button>
+      </form>
+    </Form>
+  );
+}
+
+function QuestionActions({ question }: { question: Question }) {
+    const { toast } = useToast();
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isModerating, setIsModerating] = useState(false);
+    const [moderationResult, setModerationResult] = useState<ModerateQuestionOutput | null>(null);
+    const [showModerationDialog, setShowModerationDialog] = useState(false);
+
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        const result = await deleteQuestion(question.id);
+        setIsDeleting(false);
+        if (result.error) {
+            toast({ title: "Error", description: result.error, variant: "destructive" });
+        } else {
+            toast({ title: "Success", description: "Question deleted." });
+        }
+    };
+    
+    const handleModeration = async () => {
+        setIsModerating(true);
+        const result = await runModeration(question.id);
+        setIsModerating(false);
+        if (result.error) {
+            toast({ title: "Moderation Error", description: result.error, variant: "destructive" });
+        } else if (result.data) {
+            setModerationResult(result.data);
+            setShowModerationDialog(true);
+        }
+    }
+
+    return (
+        <>
+            <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={handleModeration} disabled={isModerating}>
+                    {isModerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
+                    <span className="ml-2 hidden sm:inline">Moderate</span>
+                </Button>
+                <Button variant="ghost" size="sm" onClick={handleDelete} disabled={isDeleting} className="text-destructive hover:text-destructive">
+                    {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    <span className="ml-2 hidden sm:inline">Delete</span>
+                </Button>
+            </div>
+            
+            <AlertDialog open={showModerationDialog} onOpenChange={setShowModerationDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center gap-2">
+                        <Bot className="h-5 w-5" /> AI Moderation Result
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {moderationResult?.isAppropriate ? (
+                             <span className="flex items-center gap-2 text-green-600"><ShieldCheck className="h-4 w-4" /> This question seems appropriate.</span>
+                        ) : (
+                            `This question may be inappropriate. Reason: "${moderationResult?.reason || 'Not specified'}"`
+                        )}
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Close</AlertDialogCancel>
+                    {!moderationResult?.isAppropriate && (
+                         <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Delete Question</AlertDialogAction>
+                    )}
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
+    );
+}
+
+
+export function DashboardClient({ unansweredQuestions, answeredQuestions, user }: { unansweredQuestions: Question[], answeredQuestions: Question[], user: User }) {
+  const { toast } = useToast();
+
+  const EmptyState = ({ title, description }: { title: string, description: string }) => (
+    <div className="text-center py-16 px-4">
+        <h3 className="text-xl font-semibold">{title}</h3>
+        <p className="text-muted-foreground mt-2">{description}</p>
+    </div>
+  );
+
+  return (
+    <Tabs defaultValue="unanswered">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="unanswered">Unanswered ({unansweredQuestions.length})</TabsTrigger>
+        <TabsTrigger value="answered">Answered ({answeredQuestions.length})</TabsTrigger>
+      </TabsList>
+      <TabsContent value="unanswered">
+        <Card>
+          <CardHeader>
+            <CardTitle>Unanswered Questions</CardTitle>
+            <CardDescription>Answer these questions to have them appear on your public profile.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {unansweredQuestions.length > 0 ? (
+                <Accordion type="single" collapsible className="w-full">
+                    {unansweredQuestions.map((q) => (
+                         <AccordionItem value={q.id} key={q.id} className="border rounded-lg px-4 bg-secondary/50">
+                            <AccordionTrigger className="hover:no-underline">
+                                <div className="flex-1 text-left">
+                                    <p className="font-medium">{q.questionText}</p>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        Received {formatDistanceToNow(q.createdAt, { addSuffix: true })}
+                                    </p>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="space-y-4">
+                               <AnswerForm questionId={q.id} />
+                               <div className="border-t pt-4 flex justify-end">
+                                    <QuestionActions question={q} />
+                               </div>
+                            </AccordionContent>
+                         </AccordionItem>
+                    ))}
+                </Accordion>
+            ) : (
+                <EmptyState title="No unanswered questions" description="Share your link to get more questions!" />
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="answered">
+        <Card>
+          <CardHeader>
+            <CardTitle>Answered Questions</CardTitle>
+            <CardDescription>These are publicly visible on your profile.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {answeredQuestions.length > 0 ? (
+                answeredQuestions.map((q) => (
+                    <Card key={q.id} className="bg-secondary/50">
+                        <CardHeader>
+                            <CardTitle className="text-lg font-normal">{q.questionText}</CardTitle>
+                            <CardDescription>
+                                Asked {formatDistanceToNow(q.createdAt, { addSuffix: true })}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="border-l-2 border-primary pl-4 text-muted-foreground italic">"{q.answerText}"</p>
+                        </CardContent>
+                        <CardFooter className="flex justify-between items-center">
+                            <p className="text-xs text-muted-foreground">
+                                Answered {q.answeredAt ? formatDistanceToNow(q.answeredAt, { addSuffix: true }) : ''}
+                            </p>
+                            <QuestionActions question={q} />
+                        </CardFooter>
+                    </Card>
+                ))
+            ) : (
+                 <EmptyState title="No answered questions yet" description="Answer some questions from the 'Unanswered' tab." />
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
+}
