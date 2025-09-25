@@ -4,7 +4,7 @@ import { onSnapshot, query, collection, where, orderBy, type Query, Timestamp } 
 import { useFirestore } from '../provider';
 
 
-export function useCollection<T>(collectionPath: string, options?: {
+export function useCollection<T>(collectionPath: string | null, options?: {
     where?: [string, any, any];
     orderBy?: [string, 'asc' | 'desc'];
 }) {
@@ -14,7 +14,7 @@ export function useCollection<T>(collectionPath: string, options?: {
     const [error, setError] = useState<Error | null>(null);
 
     const memoizedQuery = useMemo(() => {
-        if (!firestore) return null;
+        if (!firestore || !collectionPath) return null;
         let q: Query = collection(firestore, collectionPath);
         if (options?.where) {
             q = query(q, where(...options.where));
@@ -30,9 +30,15 @@ export function useCollection<T>(collectionPath: string, options?: {
     useEffect(() => {
         if (!memoizedQuery) {
             setLoading(false);
+            if (collectionPath) { // Only set loading if a path was provided
+              setLoading(true);
+            } else {
+              setData([]);
+            }
             return;
         }
-
+        
+        setLoading(true);
         const unsubscribe = onSnapshot(
             memoizedQuery,
             (querySnapshot) => {

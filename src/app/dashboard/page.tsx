@@ -1,10 +1,8 @@
 import { getAuthenticatedUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import Link from "next/link";
-import { Copy } from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
 import type { User } from "@/lib/types";
 
@@ -37,7 +35,7 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
-        <DashboardClient user={user as User} />
+        <DashboardClient user={user} />
       </div>
     </div>
   );

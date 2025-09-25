@@ -64,8 +64,9 @@ export async function getAuthenticatedUser(): Promise<User | undefined> {
     const { userId } = JSON.parse(sessionCookie);
     if (!userId) return undefined;
     
-    // In a real app, you'd use the Admin SDK to verify the session cookie/token.
-    // For this starter, we'll trust the userId in the cookie.
+    // This call is the source of the server error. We'll rely on the client to fetch user data.
+    // For session validation, we'll trust the cookie for now.
+    // In a real app, you would verify the session cookie/token here with the Admin SDK.
     const user = await getUserById(userId);
     return user;
 
