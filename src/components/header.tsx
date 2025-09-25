@@ -1,12 +1,15 @@
+'use client';
+
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Logo } from "./logo";
 import { ThemeSwitcher } from "./theme-switcher";
 import { UserProfile } from "./auth/user-profile";
-import { getAuthenticatedUser } from "@/lib/auth";
+import { useUser } from "@/firebase";
+import { Skeleton } from "./ui/skeleton";
 
-export async function Header() {
-  const user = await getAuthenticatedUser();
+export function Header() {
+  const { user, loading } = useUser();
   
   return (
     <header className="bg-card border-b sticky top-0 z-50">
@@ -16,7 +19,14 @@ export async function Header() {
         </Link>
         <nav className="flex items-center gap-2">
           <ThemeSwitcher />
-          {user ? <UserProfile user={user} /> : (
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-8 w-16" />
+              <Skeleton className="h-9 w-9 rounded-full" />
+            </div>
+          ) : user ? (
+            <UserProfile firebaseUser={user} />
+          ) : (
             <>
               <Button asChild variant="ghost">
                 <Link href="/login">Log In</Link>
