@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { signup } from '@/lib/auth-actions';
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useTransition } from 'react';
 import { Loader2 } from 'lucide-react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useAuth, useFirestore } from '@/firebase/provider';
@@ -24,7 +24,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function SignupForm() {
   const { toast } = useToast();
-  const [state, formAction, isPending] = useActionState(signup, null);
+  const [state, formAction] = useActionState(signup, null);
+  const [isPending, startTransition] = useTransition();
   const auth = useAuth();
   const firestore = useFirestore();
 
@@ -59,7 +60,9 @@ export function SignupForm() {
       formData.append('uid', user.uid);
       formData.append('idToken', idToken);
       
-      formAction(formData);
+      startTransition(() => {
+        formAction(formData);
+      });
 
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {

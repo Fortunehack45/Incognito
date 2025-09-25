@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { login } from '@/lib/auth-actions';
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useTransition } from 'react';
 import { Loader2 } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useAuth } from '@/firebase/provider';
@@ -22,7 +22,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function LoginForm() {
   const { toast } = useToast();
-  const [state, formAction, isPending] = useActionState(login, null);
+  const [state, formAction] = useActionState(login, null);
+  const [isPending, startTransition] = useTransition();
   const auth = useAuth();
 
   const form = useForm<FormValues>({
@@ -42,7 +43,11 @@ export function LoginForm() {
       formData.append('password', values.password);
       formData.append('uid', userCredential.user.uid);
       formData.append('idToken', idToken);
-      formAction(formData);
+      
+      startTransition(() => {
+        formAction(formData);
+      });
+
     } catch (error: any) {
        toast({
         title: 'Login Failed',
