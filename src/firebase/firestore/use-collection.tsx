@@ -10,10 +10,7 @@ export function useCollection<T>(collectionPath: string, options?: {
     const firestore = useFirestore();
     const [data, setData] = useState<T[] | null>(null);
     const [loading, setLoading] = useState(true);
-    
-    // We don't store the error in state, we throw it via the listener
-    // to make it visible in the dev overlay.
-    // const [error, setError] = useState<Error | null>(null);
+    const [error, setError] = useState<Error | null>(null);
 
     const memoizedQuery = useMemo(() => {
         if (!firestore) return null;
@@ -25,11 +22,15 @@ export function useCollection<T>(collectionPath: string, options?: {
             q = query(q, orderBy(...options.orderBy));
         }
         return q;
-    }, [firestore, collectionPath, options?.where, options?.orderBy]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [firestore, collectionPath, JSON.stringify(options?.where), JSON.stringify(options?.orderBy)]);
 
 
     useEffect(() => {
-        if (!memoizedQuery) return;
+        if (!memoizedQuery) {
+            setLoading(false);
+            return;
+        }
 
         const unsubscribe = onSnapshot(
             memoizedQuery,
@@ -37,9 +38,11 @@ export function useCollection<T>(collectionPath: string, options?: {
                 const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
                 setData(docs);
                 setLoading(false);
+                setError(null);
             },
             (err) => {
                 console.error(`Error fetching collection ${collectionPath}:`, err);
+                setError(err);
                 setLoading(false);
             }
         );
@@ -47,5 +50,5 @@ export function useCollection<T>(collectionPath: string, options?: {
         return () => unsubscribe();
     }, [memoizedQuery, collectionPath]);
 
-    return { data, loading };
+    return { data, loading, error };
 }

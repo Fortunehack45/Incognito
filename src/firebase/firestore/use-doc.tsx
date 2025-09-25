@@ -7,6 +7,7 @@ export function useDoc<T>(docPath: string) {
     const firestore = useFirestore();
     const [data, setData] = useState<T | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
 
     const memoizedDocRef = useMemo(() => {
         if (!firestore || !docPath) return null;
@@ -28,9 +29,11 @@ export function useDoc<T>(docPath: string) {
                     setData(null);
                 }
                 setLoading(false);
+                setError(null);
             },
             (err) => {
                 console.error(`Error fetching doc ${docPath}:`, err);
+                setError(err);
                 setLoading(false);
             }
         );
@@ -38,5 +41,5 @@ export function useDoc<T>(docPath: string) {
         return () => unsubscribe();
     }, [memoizedDocRef, docPath]);
 
-    return { data, loading };
+    return { data, loading, error };
 }
