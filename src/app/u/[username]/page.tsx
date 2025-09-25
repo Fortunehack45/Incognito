@@ -1,5 +1,5 @@
 'use client';
-import { getQuestionsForUser, getUserByUsername } from "@/lib/data";
+import { getUserByUsername } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { useEffect, useState } from "react";
 import type { Question, User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCollection } from "@/firebase/firestore/use-collection";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 
 function ProfileSkeleton() {
@@ -52,6 +54,7 @@ function ProfileSkeleton() {
 export default function ProfilePage({ params }: { params: { username: string } }) {
   const [user, setUser] = useState<User | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
 
   useEffect(() => {
     async function fetchUser() {
@@ -71,17 +74,46 @@ export default function ProfilePage({ params }: { params: { username: string } }
     user ? { where: ['toUserId', '==', user.id], orderBy: ['createdAt', 'desc'] } : undefined
   );
   
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loadingUser || loadingQuestions) {
+        setLoadingTimeout(true);
+      }
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [loadingUser, loadingQuestions]);
+
   const answeredQuestions = allQuestions?.filter((q) => q.isAnswered) || [];
 
   const avatarImageUrl = "https://images.unsplash.com/photo-1613145997970-db84a7975fbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwcm9maWxlJTIwcGVyc29ufGVufDB8fHx8MTc1ODgxOTAzNXww&ixlib=rb-4.1.0&q=80&w=1080";
 
-  if (loadingUser || !user) {
+  if (!loadingTimeout && (loadingUser || loadingQuestions || !user)) {
     return (
        <div className="container mx-auto max-w-3xl px-4 py-8">
         <ProfileSkeleton />
       </div>
     );
   }
+
+  if (loadingTimeout) {
+     return (
+        <div className="container mx-auto max-w-2xl px-4 py-8">
+            <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Loading Error</AlertTitle>
+                <AlertDescription>
+                    We couldn't load this profile in time. Please check your internet connection and try refreshing the page.
+                </AlertDescription>
+            </Alert>
+        </div>
+    );
+  }
+
+  if (!user) {
+    notFound();
+  }
+
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
@@ -106,7 +138,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
         {/* Answered Questions */}
         <div className="space-y-4">
           <h2 className="text-2xl font-bold font-headline">Answered Questions</h2>
-          {loadingQuestions ? <Card><CardContent className="pt-6"><Skeleton className="h-24 w-full" /></CardContent></Card> : answeredQuestions.length > 0 ? (
+          {answeredQuestions.length > 0 ? (
             answeredQuestions.map((q) => (
               <Card key={q.id}>
                 <CardHeader>
