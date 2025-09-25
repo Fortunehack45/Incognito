@@ -29,25 +29,8 @@ import type { ModerateQuestionOutput } from "@/ai/flows/question-moderation-tool
 import { useCollection } from "@/firebase/firestore/use-collection";
 import { Skeleton } from "../ui/skeleton";
 import { useFirestore } from '@/firebase/provider';
+import type { User, Question } from '@/lib/types';
 
-// Define the types directly in the client component to avoid server-only imports
-export type User = {
-  id: string;
-  username: string;
-  email: string;
-  bio: string | null;
-  createdAt: Date | Timestamp;
-};
-
-export type Question = {
-  id: string;
-  toUserId: string;
-  questionText: string;
-  answerText: string | null;
-  isAnswered: boolean;
-  createdAt: Date | Timestamp;
-  answeredAt: Date | Timestamp | null;
-};
 
 const answerSchema = z.object({
   answerText: z.string().min(1, "Answer cannot be empty.").max(1000, "Answer is too long."),

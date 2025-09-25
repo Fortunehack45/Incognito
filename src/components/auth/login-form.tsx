@@ -10,7 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { login } from '@/lib/auth-actions';
 import { useActionState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useAuth } from '@/firebase/provider';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -22,7 +23,7 @@ type FormValues = z.infer<typeof formSchema>;
 export function LoginForm() {
   const { toast } = useToast();
   const [state, formAction, isPending] = useActionState(login, null);
-  const router = useRouter();
+  const auth = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -31,6 +32,25 @@ export function LoginForm() {
       password: '',
     },
   });
+
+  const onSubmit = async (values: FormValues) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      const idToken = await userCredential.user.getIdToken();
+      const formData = new FormData();
+      formData.append('email', values.email);
+      formData.append('password', values.password);
+      formData.append('uid', userCredential.user.uid);
+      formData.append('idToken', idToken);
+      formAction(formData);
+    } catch (error: any) {
+       toast({
+        title: 'Login Failed',
+        description: 'Invalid email or password.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   useEffect(() => {
     if (state?.error) {
@@ -44,7 +64,7 @@ export function LoginForm() {
 
   return (
     <Form {...form}>
-      <form action={formAction} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="email"

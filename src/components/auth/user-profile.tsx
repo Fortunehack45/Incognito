@@ -7,16 +7,7 @@ import Link from "next/link";
 import type { User as FirebaseUser } from "firebase/auth";
 import { useDoc } from "@/firebase/firestore/use-doc";
 import { Skeleton } from "../ui/skeleton";
-import { Timestamp } from "firebase/firestore";
-
-// Define the type directly in the client component to avoid server-only imports
-type AppUser = {
-  id: string;
-  username: string;
-  email: string;
-  bio: string | null;
-  createdAt: Date | Timestamp;
-};
+import type { User as AppUser } from '@/lib/types';
 
 export function UserProfile({ firebaseUser }: { firebaseUser: FirebaseUser }) {
   const { data: appUser, loading } = useDoc<AppUser>(`users/${firebaseUser.uid}`);

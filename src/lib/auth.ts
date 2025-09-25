@@ -1,18 +1,16 @@
 'use server';
 
-import { collection, doc, getDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where, Timestamp, initializeFirestore } from 'firebase/firestore';
 import { cookies } from 'next/headers';
 import { SESSION_COOKIE_NAME } from './constants';
-import { firestore } from '@/firebase/server-init';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { firebaseConfig } from '@/firebase/config';
+import type { User } from './types';
 
-// This type is now defined directly in the auth file
-export type User = {
-  id: string;
-  username: string;
-  email: string;
-  bio: string | null;
-  createdAt: Date | Timestamp;
-};
+// This is a server-only file. We need to initialize the app here.
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const firestore = initializeFirestore(app, {});
+
 
 export async function createSession(userId: string, idToken: string) {
   cookies().set(SESSION_COOKIE_NAME, JSON.stringify({ userId, idToken }), {

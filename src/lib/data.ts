@@ -6,21 +6,16 @@ import {
   query,
   where,
   orderBy,
-  Timestamp
+  Timestamp,
+  initializeFirestore,
 } from 'firebase/firestore';
-import { firestore } from '@/firebase/server-init';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { firebaseConfig } from '@/firebase/config';
+import type { Question } from './types';
 
-// This type is used server-side, keep it here.
-export type Question = {
-  id: string;
-  toUserId: string;
-  questionText: string;
-  answerText: string | null;
-  isAnswered: boolean;
-  createdAt: Date | Timestamp;
-  answeredAt: Date | Timestamp | null;
-};
-
+// This is a server-only file. We need to initialize the app here.
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const firestore = initializeFirestore(app, {});
 
 const questionsCollection = collection(firestore, 'questions');
 
@@ -29,11 +24,13 @@ export async function getQuestionsForUser(userId: string): Promise<Question[]> {
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => {
     const data = doc.data();
+    const createdAt = data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date();
+    const answeredAt = data.answeredAt instanceof Timestamp ? data.answeredAt.toDate() : null;
     return {
       id: doc.id,
       ...data,
-      createdAt: data.createdAt?.toDate(),
-      answeredAt: data.answeredAt?.toDate(),
+      createdAt,
+      answeredAt,
     } as Question;
   });
 }
@@ -45,10 +42,12 @@ export async function getQuestionById(questionId: string): Promise<Question | un
     return undefined;
   }
   const data = questionDoc.data();
+  const createdAt = data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date();
+  const answeredAt = data.answeredAt instanceof Timestamp ? data.answeredAt.toDate() : null;
   return {
     id: questionDoc.id,
     ...data,
-    createdAt: data.createdAt?.toDate(),
-    answeredAt: data.answeredAt?.toDate(),
+    createdAt,
+    answeredAt,
   } as Question;
 }

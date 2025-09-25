@@ -10,6 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { signup } from '@/lib/auth-actions';
 import { useActionState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { useAuth, useFirestore } from '@/firebase/provider';
+import { doc, setDoc } from 'firebase/firestore';
 
 const formSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters.').max(20, 'Username must be at most 20 characters.').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores.'),
@@ -22,6 +25,8 @@ type FormValues = z.infer<typeof formSchema>;
 export function SignupForm() {
   const { toast } = useToast();
   const [state, formAction, isPending] = useActionState(signup, null);
+  const auth = useAuth();
+  const firestore = useFirestore();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -31,6 +36,40 @@ export function SignupForm() {
       password: '',
     },
   });
+
+  const onSubmit = async (values: FormValues) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+      
+      const newUser = {
+        email: values.email,
+        username: values.username,
+        bio: null,
+        createdAt: new Date(),
+      };
+      await setDoc(doc(firestore, 'users', user.uid), newUser);
+      
+      const idToken = await user.getIdToken();
+      
+      const formData = new FormData();
+      formData.append('username', values.username);
+      formData.append('email', values.email);
+      formData.append('password', values.password);
+      formData.append('uid', user.uid);
+      formData.append('idToken', idToken);
+      
+      formAction(formData);
+
+    } catch (error: any) {
+      if (error.code === 'auth/email-already-in-use') {
+        toast({ title: 'Signup Failed', description: 'An account with this email already exists.', variant: 'destructive' });
+      } else {
+        toast({ title: 'Signup Failed', description: 'An unknown error occurred.', variant: 'destructive' });
+      }
+    }
+  };
+
 
   useEffect(() => {
     if (state?.error) {
@@ -44,7 +83,7 @@ export function SignupForm() {
 
   return (
     <Form {...form}>
-      <form action={formAction} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="username"

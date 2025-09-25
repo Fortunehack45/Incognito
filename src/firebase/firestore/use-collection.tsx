@@ -1,9 +1,11 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { onSnapshot, query, collection, where, orderBy, type Query } from 'firebase/firestore';
+import { onSnapshot, query, collection, where, orderBy, type Query, Timestamp } from 'firebase/firestore';
 import { useFirestore } from '../provider';
+import type { Question } from '@/lib/types';
 
-export function useCollection<T>(collectionPath: string, options?: {
+
+export function useCollection<T extends Question>(collectionPath: string, options?: {
     where?: [string, any, any];
     orderBy?: [string, 'asc' | 'desc'];
 }) {
@@ -35,7 +37,13 @@ export function useCollection<T>(collectionPath: string, options?: {
         const unsubscribe = onSnapshot(
             memoizedQuery,
             (querySnapshot) => {
-                const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
+                const docs = querySnapshot.docs.map(doc => {
+                    const docData = doc.data();
+                    // Manually convert Timestamps to Dates
+                    const createdAt = docData.createdAt instanceof Timestamp ? docData.createdAt.toDate() : docData.createdAt;
+                    const answeredAt = docData.answeredAt instanceof Timestamp ? docData.answeredAt.toDate() : docData.answeredAt;
+                    return { id: doc.id, ...docData, createdAt, answeredAt } as T;
+                });
                 setData(docs);
                 setLoading(false);
                 setError(null);
