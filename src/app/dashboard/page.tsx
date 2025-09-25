@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
 import { useUser } from "@/firebase/auth/use-user";
