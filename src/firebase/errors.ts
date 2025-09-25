@@ -39,15 +39,7 @@ ${JSON.stringify(createSecurityRuleContext(context), null, 2)}
     this.name = 'FirestorePermissionError';
 
     // This is to make the error visible in the Next.js development overlay
-    // by adding a digest.
-    if (typeof (this as any).digest === 'undefined') {
-        try {
-            const {digestString} = require('next/dist/server/app-render/entry-base');
-            (this as any).digest = digestString;
-        } catch (e) {
-            // Not in a Next.js environment, or digestString is not available.
-        }
-    }
+    // by adding a digest. This was the source of the build error and has been removed.
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
     if (Error.captureStackTrace) {
