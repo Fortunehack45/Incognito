@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FirebaseClientProvider } from "@/firebase";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Q&A Hub",
