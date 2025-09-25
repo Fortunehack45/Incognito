@@ -6,8 +6,25 @@ import { revalidatePath } from 'next/cache';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
-import { createSession, clearSession, type User, getUserByUsername } from './auth';
-import { auth, firestore } from '@/firebase/server-init';
+import { createSession, clearSession, type User, getUserByUsername, getUserById } from './auth';
+
+// This is a workaround to get the client-side auth and firestore instances
+// in a server action. It's not ideal, but it's necessary to avoid the
+// server-only module import error.
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { firebaseConfig } from '@/firebase/config';
+
+// We need to initialize the app on the server to get the auth and firestore instances
+// This is safe because server actions are only executed on the server.
+if (getApps().length === 0) {
+  initializeApp(firebaseConfig);
+}
+
+const auth = getAuth();
+const firestore = getFirestore();
+
 
 const loginSchema = z.object({
   email: z.string().email(),

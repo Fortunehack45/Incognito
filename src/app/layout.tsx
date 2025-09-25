@@ -2,7 +2,7 @@ import "./globals.css";
 import { Header } from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
-import { FirebaseClientProvider } from "@/firebase";
+import { FirebaseClientProvider } from "@/firebase/client-provider";
 
 export default function RootLayout({
   children,

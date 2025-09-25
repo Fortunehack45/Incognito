@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Logo } from "./logo";
 import { ThemeSwitcher } from "./theme-switcher";
 import { UserProfile } from "./auth/user-profile";
-import { useUser } from "@/firebase";
+import { useUser } from "@/firebase/auth/use-user";
 import { Skeleton } from "./ui/skeleton";
 
 export function Header() {

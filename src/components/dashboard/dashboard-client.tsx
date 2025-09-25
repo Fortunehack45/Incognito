@@ -1,6 +1,6 @@
 'use client';
 
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, doc, setDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form";
-import { answerQuestion, deleteQuestion, runModeration } from "@/lib/actions";
+import { revalidateAnswer, revalidateDelete, runModeration } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { Bot, Loader2, ShieldCheck, Trash2 } from "lucide-react";
@@ -26,8 +26,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import type { ModerateQuestionOutput } from "@/ai/flows/question-moderation-tool";
-import { useCollection } from "@/firebase";
+import { useCollection } from "@/firebase/firestore/use-collection";
 import { Skeleton } from "../ui/skeleton";
+import { useFirestore } from '@/firebase/provider';
 
 // Define the types directly in the client component to avoid server-only imports
 export type User = {
@@ -55,6 +56,7 @@ const answerSchema = z.object({
 function AnswerForm({ questionId }: { questionId: string }) {
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
+  const firestore = useFirestore();
   const form = useForm({
     resolver: zodResolver(answerSchema),
     defaultValues: { answerText: "" },
@@ -62,13 +64,21 @@ function AnswerForm({ questionId }: { questionId: string }) {
 
   async function onSubmit(values: z.infer<typeof answerSchema>) {
     startTransition(async () => {
-      const result = await answerQuestion(questionId, values.answerText);
-      if (result.error) {
-        toast({ title: "Error", description: result.error, variant: "destructive" });
-      } else {
-        toast({ title: "Success", description: "Your answer has been published." });
-        form.reset();
-      }
+        try {
+            const questionRef = doc(firestore, 'questions', questionId);
+            await setDoc(questionRef, {
+                answerText: values.answerText,
+                isAnswered: true,
+                answeredAt: serverTimestamp(),
+            }, { merge: true });
+
+            await revalidateAnswer(questionId);
+
+            toast({ title: "Success", description: "Your answer has been published." });
+            form.reset();
+        } catch (error) {
+            toast({ title: "Error", description: "Failed to publish answer.", variant: "destructive" });
+        }
     });
   }
 
@@ -102,14 +112,16 @@ function QuestionActions({ question }: { question: Question }) {
     const [isModerating, startModerationTransition] = useTransition();
     const [moderationResult, setModerationResult] = useState<ModerateQuestionOutput | null>(null);
     const [showModerationDialog, setShowModerationDialog] = useState(false);
+    const firestore = useFirestore();
 
     const handleDelete = async () => {
         startDeleteTransition(async () => {
-            const result = await deleteQuestion(question.id);
-            if (result.error) {
-                toast({ title: "Error", description: result.error, variant: "destructive" });
-            } else {
+            try {
+                await deleteDoc(doc(firestore, 'questions', question.id));
+                await revalidateDelete(question.id);
                 toast({ title: "Success", description: "Question deleted." });
+            } catch (error) {
+                 toast({ title: "Error", description: 'Failed to delete question', variant: "destructive" });
             }
         });
     };

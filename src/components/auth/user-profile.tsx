@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { logout } from "@/lib/auth-actions";
 import Link from "next/link";
 import type { User as FirebaseUser } from "firebase/auth";
-import { useDoc } from "@/firebase";
+import { useDoc } from "@/firebase/firestore/use-doc";
 import { Skeleton } from "../ui/skeleton";
 import { Timestamp } from "firebase/firestore";
 

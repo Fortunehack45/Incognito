@@ -5,11 +5,12 @@ import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { firebaseConfig } from './config';
 
+// --- LAZY INITIALIZATION FOR SERVER ---
 let firebaseApp: FirebaseApp;
 if (!getApps().length) {
-  firebaseApp = initializeApp(firebaseConfig);
+    firebaseApp = initializeApp(firebaseConfig);
 } else {
-  firebaseApp = getApp();
+    firebaseApp = getApp();
 }
 
 export const auth: Auth = getAuth(firebaseApp);
