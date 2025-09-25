@@ -5,19 +5,12 @@ import { Header } from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FirebaseProvider } from "@/firebase/provider";
-import { useEffect, useState } from "react";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
@@ -29,17 +22,15 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased h-full">
         <ThemeProvider>
-          {isMounted ? (
-            <FirebaseProvider>
-              <div className="flex flex-col min-h-screen">
-                <Header />
-                <main className="flex-grow">
-                  {children}
-                </main>
-              </div>
-              <Toaster />
-            </FirebaseProvider>
-          ) : null}
+          <FirebaseProvider>
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex-grow">
+                {children}
+              </main>
+            </div>
+            <Toaster />
+          </FirebaseProvider>
         </ThemeProvider>
       </body>
     </html>
