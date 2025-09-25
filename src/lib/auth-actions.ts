@@ -3,19 +3,14 @@
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, initializeApp, getApps, getApp } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 import {
   addUser,
   getUserByUsername,
 } from './data';
 import { createSession, clearSession } from './auth';
-import { firebaseConfig } from '@/firebase/config';
-
-// Initialize Firebase for SERVER-SIDE use only
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-
+import { auth } from '@/firebase/server-init';
 
 const loginSchema = z.object({
   email: z.string().email(),

@@ -10,19 +10,11 @@ import {
   deleteDoc,
   serverTimestamp,
   orderBy,
-  initializeApp,
-  getApps,
-  getApp,
-  getFirestore,
 } from 'firebase/firestore';
 import type { User, Question } from './types';
-import { firebaseConfig } from '@/firebase/config';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-
-// Initialize Firebase for SERVER-SIDE use only
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-const firestore = getFirestore(app);
+import { firestore } from '@/firebase/server-init';
 
 const usersCollection = collection(firestore, 'users');
 const questionsCollection = collection(firestore, 'questions');
