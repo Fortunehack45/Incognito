@@ -1,9 +1,7 @@
 "use client"
 import "./globals.css";
-import { Header } from "@/components/header";
-import { Toaster } from "@/components/ui/toaster";
-import { ThemeProvider } from "@/components/theme-provider";
-import { FirebaseProvider } from "@/firebase/provider";
+import { ClientLayout } from "@/components/client-layout";
+
 
 export default function RootLayout({
   children,
@@ -20,17 +18,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased h-full">
-        <ThemeProvider>
-          <FirebaseProvider>
-            <div className="flex flex-col min-h-screen">
-              <Header />
-              <main className="flex-grow">
-                {children}
-              </main>
-            </div>
-            <Toaster />
-          </FirebaseProvider>
-        </ThemeProvider>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
