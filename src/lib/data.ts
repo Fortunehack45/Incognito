@@ -1,4 +1,3 @@
-'use client';
 import {
   collection,
   doc,
@@ -12,7 +11,6 @@ import {
   serverTimestamp,
   orderBy,
 } from 'firebase/firestore';
-import { getFirestore } from 'firebase/firestore';
 import type { User, Question } from './types';
 import { initializeFirebase } from '@/firebase';
 
