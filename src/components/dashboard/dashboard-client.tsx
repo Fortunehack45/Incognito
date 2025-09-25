@@ -1,6 +1,6 @@
 'use client';
 
-import type { Question, User } from "@/lib/types";
+import type { Question } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "..
 import type { ModerateQuestionOutput } from "@/ai/flows/question-moderation-tool";
 import { useCollection } from "@/firebase";
 import { Skeleton } from "../ui/skeleton";
+import type { User } from "@/lib/auth";
 
 const answerSchema = z.object({
   answerText: z.string().min(1, "Answer cannot be empty.").max(1000, "Answer is too long."),

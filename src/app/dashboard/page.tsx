@@ -1,4 +1,4 @@
-import { getAuthenticatedUser } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/actions";
 import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

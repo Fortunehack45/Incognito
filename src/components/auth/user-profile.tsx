@@ -4,11 +4,18 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { logout } from "@/lib/auth-actions";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import type { User as AppUser } from "@/lib/types";
 import Link from "next/link";
 import type { User as FirebaseUser } from "firebase/auth";
 import { useDoc } from "@/firebase";
 import { Skeleton } from "../ui/skeleton";
+
+// Duplicating the User type here to avoid importing from a server-only module
+type AppUser = {
+  id: string;
+  username: string;
+  email: string;
+  bio: string | null;
+};
 
 export function UserProfile({ firebaseUser }: { firebaseUser: FirebaseUser }) {
   const { data: appUser, loading } = useDoc<AppUser>(`users/${firebaseUser.uid}`);
