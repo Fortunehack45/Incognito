@@ -3,7 +3,6 @@ import { getUserByUsername } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { formatDistanceToNow } from "date-fns";
 import { AskQuestionForm } from "@/components/profile/ask-question-form";
 
@@ -16,7 +15,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
 
   const allQuestions = await getQuestionsForUser(user.id);
   const answeredQuestions = allQuestions.filter((q) => q.isAnswered);
-  const avatarImage = PlaceHolderImages.find((p) => p.id === `avatar-${user.id}`);
+  const avatarImageUrl = "https://images.unsplash.com/photo-1613145997970-db84a7975fbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwcm9maWxlJTIwcGVyc29ufGVufDB8fHx8MTc1ODgxOTAzNXww&ixlib=rb-4.1.0&q=80&w=1080";
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
@@ -25,7 +24,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-col sm:flex-row items-center gap-6 p-6">
             <Avatar className="h-24 w-24 border-4 border-primary">
-              {avatarImage && <AvatarImage src={avatarImage.imageUrl} alt={user.username} />}
+              <AvatarImage src={avatarImageUrl} alt={user.username} />
               <AvatarFallback className="text-3xl">{user.username.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="text-center sm:text-left">

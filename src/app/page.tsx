@@ -2,11 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { getAuthenticatedUser } from "@/lib/auth";
 
 export default async function Home() {
-  const heroImage = PlaceHolderImages.find(p => p.id === "hero-questions");
+  const heroImage = {
+      "id": "hero-questions",
+      "description": "An abstract image representing questions and curiosity",
+      "imageUrl": "https://images.unsplash.com/photo-1699993131854-a1cde51ce9da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMHF1ZXN0aW9ufGVufDB8fHx8MTc1ODgzMDI2MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract question"
+    };
   const user = await getAuthenticatedUser();
 
   return (
