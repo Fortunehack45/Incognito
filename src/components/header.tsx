@@ -5,7 +5,8 @@ import { Logo } from "./logo";
 import { logout } from "@/lib/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "./ui/dropdown-menu";
+import { ThemeSwitcher } from "./theme-switcher";
 
 export async function Header() {
   const user = await getAuthenticatedUser();
@@ -17,7 +18,8 @@ export async function Header() {
         <Link href="/">
           <Logo />
         </Link>
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-2">
+          <ThemeSwitcher />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
