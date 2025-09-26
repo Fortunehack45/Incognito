@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { onSnapshot, doc } from 'firebase/firestore';
 import { useFirestore } from '../provider';
 
-export function useDoc<T>(docPath: string) {
+export function useDoc<T>(docPath: string | null) {
     const firestore = useFirestore();
     const [data, setData] = useState<T | null>(null);
     const [loading, setLoading] = useState(true);
@@ -15,11 +15,14 @@ export function useDoc<T>(docPath: string) {
     }, [firestore, docPath]);
 
     useEffect(() => {
+        // If the path is null or empty (e.g., logged-out user), reset state and do nothing.
         if (!memoizedDocRef) {
+            setData(null);
             setLoading(false);
             return;
         };
 
+        setLoading(true);
         const unsubscribe = onSnapshot(
             memoizedDocRef,
             (docSnapshot) => {
@@ -38,6 +41,7 @@ export function useDoc<T>(docPath: string) {
             }
         );
 
+        // Cleanup function to unsubscribe from the listener when the component unmounts or path changes
         return () => unsubscribe();
     }, [memoizedDocRef, docPath]);
 

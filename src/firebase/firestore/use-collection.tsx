@@ -13,6 +13,7 @@ export function useCollection<T>(collectionPath: string | null, options?: {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
+    // Memoize the query to prevent re-creating it on every render
     const memoizedQuery = useMemo(() => {
         if (!firestore || !collectionPath) return null;
         let q: Query = collection(firestore, collectionPath);
@@ -28,13 +29,10 @@ export function useCollection<T>(collectionPath: string | null, options?: {
 
 
     useEffect(() => {
+        // If there's no query (e.g., user logged out), reset state and do nothing.
         if (!memoizedQuery) {
+            setData([]);
             setLoading(false);
-            if (collectionPath) { // Only set loading if a path was provided
-              setLoading(true);
-            } else {
-              setData([]);
-            }
             return;
         }
         
@@ -44,7 +42,7 @@ export function useCollection<T>(collectionPath: string | null, options?: {
             (querySnapshot) => {
                 const docs = querySnapshot.docs.map(doc => {
                     const docData = doc.data();
-                    // Manually convert Timestamps to Dates
+                    // Manually convert Timestamps to Dates for serializability
                     const createdAt = docData.createdAt instanceof Timestamp ? docData.createdAt.toDate() : docData.createdAt;
                     const answeredAt = docData.answeredAt instanceof Timestamp ? docData.answeredAt.toDate() : docData.answeredAt;
                     return { id: doc.id, ...docData, createdAt, answeredAt } as T;
@@ -60,6 +58,7 @@ export function useCollection<T>(collectionPath: string | null, options?: {
             }
         );
 
+        // Cleanup function to unsubscribe from the listener when the component unmounts or query changes
         return () => unsubscribe();
     }, [memoizedQuery, collectionPath]);
 

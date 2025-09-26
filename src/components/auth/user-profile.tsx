@@ -21,11 +21,10 @@ export function UserProfile({ firebaseUser }: { firebaseUser: FirebaseUser }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // Refresh the router to clear the client-side cache of user data
-      router.refresh();
-      toast({ title: "Logged out successfully."});
-      // Then push to the login page
+      // The onAuthStateChanged listener in useUser will handle the redirect.
+      // We just push to the login page as a fallback.
       router.push('/login');
+      toast({ title: "Logged out successfully."});
     } catch (error) {
       toast({ title: "Logout Failed", description: "An error occurred during logout.", variant: "destructive" });
     }
