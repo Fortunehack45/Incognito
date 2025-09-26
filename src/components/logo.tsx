@@ -22,7 +22,7 @@ export function Logo({ className }: { className?: string }) {
           <path d="M12 19.5v-3" />
         </svg>
       </div>
-      <span className="text-xl">Q&A Hub</span>
+      <span className="text-xl">Incognito</span>
     </div>
   );
 }

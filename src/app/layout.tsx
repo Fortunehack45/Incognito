@@ -11,7 +11,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
-        <title>Q&A Hub</title>
+        <title>Incognito</title>
         <meta name="description" content="Ask and answer anonymous questions" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
