@@ -66,8 +66,7 @@ export default function DashboardPage() {
   }
 
   // On the client, if auth has loaded and there's no user, redirect.
-  // The useUser hook should handle this, but this is a safeguard.
-  if (!firebaseUser) {
+  if (!loadingAuth && !firebaseUser) {
     return redirect("/login");
   }
   

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { useAuth } from '../provider';
+import { usePathname, useRouter } from 'next/navigation';
 
 export function useUser() {
   const auth = useAuth();

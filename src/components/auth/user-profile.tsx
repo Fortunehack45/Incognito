@@ -21,8 +21,8 @@ export function UserProfile({ firebaseUser }: { firebaseUser: FirebaseUser }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // The onAuthStateChanged listener in useUser will handle the redirect.
-      // We just push to the login page as a fallback.
+      // The onAuthStateChanged listener in useUser will handle the state change.
+      // And protected routes will handle the redirect.
       router.push('/login');
       toast({ title: "Logged out successfully."});
     } catch (error) {
