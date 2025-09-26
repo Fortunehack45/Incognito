@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import { moderateQuestion } from '@/ai/flows/question-moderation-tool';
 import { getQuestionById } from './data';
-import { getUserByUsername } from './auth';
 
 // --- Question Actions ---
 
