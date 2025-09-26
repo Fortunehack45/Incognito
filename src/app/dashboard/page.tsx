@@ -57,6 +57,7 @@ function DashboardSkeleton() {
 
 export default function DashboardPage() {
   const { user: firebaseUser, loading: loadingAuth } = useUser();
+  const { data: appUser, loading: loadingUser } = useDoc<User>(firebaseUser ? `users/${firebaseUser.uid}`: '');
   
   if (loadingAuth) {
     return <DashboardSkeleton />;
@@ -65,11 +66,7 @@ export default function DashboardPage() {
   if (!firebaseUser) {
     return redirect("/login");
   }
-
-  // Fetch appUser only after confirming firebaseUser exists
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { data: appUser, loading: loadingUser } = useDoc<User>(`users/${firebaseUser.uid}`);
-
+  
   if (loadingUser) {
      return <DashboardSkeleton />;
   }
