@@ -249,7 +249,7 @@ export function DashboardClient({ user }: { user: User }) {
   const answeredQuestions = questions?.filter(q => q.isAnswered) || [];
 
   const EmptyState = ({ title, description }: { title: string, description: string }) => (
-    <div className="text-center py-16 px-4 border border-dashed rounded-lg">
+    <div className="text-center py-16 px-4 border border-dashed rounded-lg bg-card">
         <h3 className="text-xl font-semibold font-headline">{title}</h3>
         <p className="text-muted-foreground mt-2">{description}</p>
     </div>
@@ -262,7 +262,7 @@ export function DashboardClient({ user }: { user: User }) {
         <TabsTrigger value="answered">Answered ({answeredQuestions.length})</TabsTrigger>
       </TabsList>
       <TabsContent value="unanswered">
-        <Card className="border-none shadow-none">
+        <Card className="border-none shadow-none bg-transparent">
           <CardHeader>
             <CardTitle>Unanswered Questions</CardTitle>
             <CardDescription>Answer these questions to have them appear on your public profile.</CardDescription>
@@ -271,8 +271,7 @@ export function DashboardClient({ user }: { user: User }) {
             {loading ? <LoadingSkeleton /> : unansweredQuestions.length > 0 ? (
                 <Accordion type="single" collapsible className="w-full space-y-4">
                     {unansweredQuestions.map((q) => (
-                         <AccordionItem value={q.id} key={q.id} className="border-b-0">
-                           <Card className="bg-secondary/50">
+                         <AccordionItem value={q.id} key={q.id} className="border rounded-lg bg-card overflow-hidden">
                              <div className="flex items-center justify-between w-full gap-4 p-4 sm:p-6">
                                <AccordionTrigger className="hover:no-underline p-0 flex-1">
                                     <div className="flex-1 text-left">
@@ -289,7 +288,6 @@ export function DashboardClient({ user }: { user: User }) {
                             <AccordionContent className="p-6 pt-0 space-y-4">
                                <AnswerForm questionId={q.id} />
                             </AccordionContent>
-                           </Card>
                          </AccordionItem>
                     ))}
                 </Accordion>
@@ -300,7 +298,7 @@ export function DashboardClient({ user }: { user: User }) {
         </Card>
       </TabsContent>
       <TabsContent value="answered">
-        <Card className="border-none shadow-none">
+        <Card className="border-none shadow-none bg-transparent">
           <CardHeader>
             <CardTitle>Answered Questions</CardTitle>
             <CardDescription>These are publicly visible on your profile.</CardDescription>
@@ -308,7 +306,7 @@ export function DashboardClient({ user }: { user: User }) {
           <CardContent className="space-y-4">
             {loading ? <LoadingSkeleton /> : answeredQuestions.length > 0 ? (
                 answeredQuestions.map((q) => (
-                    <Card key={q.id} className="bg-secondary/50">
+                    <Card key={q.id} className="bg-card">
                         <CardHeader>
                             <CardDescription>Anonymous asked:</CardDescription>
                             <CardTitle className="text-lg font-normal">{q.questionText}</CardTitle>

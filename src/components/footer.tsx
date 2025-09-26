@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 export function Footer() {
   return (
-    <footer className="border-t bg-background">
+    <footer className="border-t">
       <div className="container mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-sm text-muted-foreground text-center sm:text-left">
           &copy; {new Date().getFullYear()} Incognito. All rights reserved.
