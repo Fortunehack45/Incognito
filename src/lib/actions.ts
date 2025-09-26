@@ -4,21 +4,20 @@ import { revalidatePath } from 'next/cache';
 import { moderateQuestion } from '@/ai/flows/question-moderation-tool';
 import { getQuestionById } from './data';
 import { firestore } from '@/firebase/admin';
+import type { User } from './types';
 
 // --- Question Actions ---
 
-export async function validateQuestion(userId: string, questionText: string) {
-    if (!userId || !questionText) {
+export async function validateQuestion(user: User, questionText: string) {
+    if (!user || !questionText) {
         return { error: 'Invalid input.' };
     }
 
     try {
-        const user = await getUserById(userId);
-
-        if (user?.isModerationEnabled) {
+        if (user.isModerationEnabled) {
             const moderationResult = await moderateQuestion({ questionText });
             if (!moderationResult.isAppropriate) {
-            return { error: `Your question was deemed inappropriate. Reason: ${moderationResult.reason}` };
+                return { error: `Your question was deemed inappropriate. Reason: ${moderationResult.reason}` };
             }
         }
         
@@ -87,7 +86,17 @@ export async function getUserById(userId: string) {
     try {
         const userDoc = await firestore.collection('users').doc(userId).get();
         if (!userDoc.exists) return null;
-        return userDoc.data();
+        // Important: We need to return a plain object, not a Firestore document
+        const data = userDoc.data();
+        if (!data) return null;
+        return {
+            id: userDoc.id,
+            username: data.username,
+            email: data.email,
+            bio: data.bio || null,
+            createdAt: data.createdAt, // This will be a Timestamp
+            isModerationEnabled: data.isModerationEnabled || false,
+        } as User;
     } catch (error) {
         console.error("Failed to get user by ID", error);
         return null;

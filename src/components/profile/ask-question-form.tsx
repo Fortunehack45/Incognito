@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
+import type { User } from '@/lib/types';
 
 const formSchema = z.object({
   questionText: z.string().min(10, 'Question must be at least 10 characters.').max(280, 'Question cannot be more than 280 characters.'),
@@ -20,7 +21,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function AskQuestionForm({ userId }: { userId: string }) {
+export function AskQuestionForm({ user }: { user: User }) {
   const { toast } = useToast();
   const [isPending, setIsPending] = useState(false);
   const firestore = useFirestore();
@@ -34,7 +35,8 @@ export function AskQuestionForm({ userId }: { userId: string }) {
 
   async function onSubmit(values: FormValues) {
     setIsPending(true);
-    const result = await validateQuestion(userId, values.questionText);
+    // The server action now takes the full user object
+    const result = await validateQuestion(user, values.questionText);
     
     if (result.error) {
         toast({
@@ -47,7 +49,7 @@ export function AskQuestionForm({ userId }: { userId: string }) {
         try {
             const questionsCollection = collection(firestore, 'questions');
             await addDoc(questionsCollection, {
-                toUserId: userId,
+                toUserId: user.id,
                 questionText: values.questionText,
                 answerText: null,
                 isAnswered: false,

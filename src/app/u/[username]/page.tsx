@@ -103,7 +103,7 @@ export default function ProfilePage() {
         </Card>
 
         {/* Ask a Question Form */}
-        <AskQuestionForm userId={user.id} />
+        <AskQuestionForm user={user} />
 
         {/* Answered Questions */}
         <div className="space-y-4">
