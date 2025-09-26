@@ -16,12 +16,9 @@ interface ShareImageProps {
 export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
   ({ question, user, theme }, ref) => {
     
-    // This component is not rendered in the main DOM tree in a visible way.
-    // It's rendered off-screen and used by html2canvas to generate an image.
-    // We need to provide the styles inline or have a way to apply global CSS.
-    // For simplicity and to ensure it works, we will use inline-like styling via Tailwind classes.
-    // Note: The active theme's CSS variables will be available.
-    
+    const dateToFormat = question.answeredAt || question.createdAt;
+    const dateLabel = question.answeredAt ? 'Answered on' : 'Received on';
+
     return (
       <div
         ref={ref}
@@ -43,19 +40,22 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
                     </p>
                 </div>
 
-                <div className="border-t border-border my-4"></div>
-
-                <div>
-                    <p className="text-sm text-primary font-semibold font-sans">Your answer:</p>
-                    <p className="text-lg text-foreground/90 italic font-sans mt-1">
-                        "{question.answerText}"
-                    </p>
-                </div>
+                {question.answerText && (
+                  <>
+                    <div className="border-t border-border my-4"></div>
+                    <div>
+                        <p className="text-sm text-primary font-semibold font-sans">Your answer:</p>
+                        <p className="text-lg text-foreground/90 italic font-sans mt-1">
+                            "{question.answerText}"
+                        </p>
+                    </div>
+                  </>
+                )}
             </div>
 
             <div className="flex justify-between items-center text-sm text-muted-foreground font-sans">
                  <span>@{user.username}</span>
-                 <span>Answered on {question.answeredAt ? format(new Date(question.answeredAt as any), 'MMMM d, yyyy') : ''}</span>
+                 <span>{dateLabel} {dateToFormat ? format(new Date(dateToFormat as any), 'MMMM d, yyyy') : ''}</span>
             </div>
         </div>
       </div>
@@ -64,3 +64,5 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
 );
 
 ShareImage.displayName = "ShareImage";
+
+    

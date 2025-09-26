@@ -92,7 +92,7 @@ function AnswerForm({ questionId }: { questionId: string }) {
   );
 }
 
-function QuestionActions({ question, user, isAnswered }: { question: Question, user: User, isAnswered: boolean }) {
+function QuestionActions({ question, user }: { question: Question, user: User }) {
     const { toast } = useToast();
     const { theme } = useTheme();
     const [isDeleting, startDeleteTransition] = useTransition();
@@ -155,25 +155,24 @@ function QuestionActions({ question, user, isAnswered }: { question: Question, u
     return (
         <>
             <div className="flex items-center gap-2">
-                {isAnswered && (
-                    <>
-                        <Button variant="ghost" size="sm" onClick={handleDownload} disabled={isDownloading}>
-                            {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                            <span className="ml-2 hidden sm:inline">Download</span>
-                        </Button>
-                        <div className="fixed top-[-9999px] left-[-9999px]">
-                            <ShareImage question={question} user={user} ref={imageRef} theme={theme} />
-                        </div>
-                    </>
-                )}
+                <Button variant="ghost" size="sm" onClick={handleDownload} disabled={isDownloading}>
+                    {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                    <span className="ml-2 hidden sm:inline">Download</span>
+                </Button>
+                
                 <Button variant="ghost" size="sm" onClick={handleModeration} disabled={isModerating}>
                     {isModerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
                     <span className="ml-2 hidden sm:inline">Moderate</span>
                 </Button>
+                
                 <Button variant="ghost" size="sm" onClick={handleDelete} disabled={isDeleting} className="text-destructive hover:text-destructive">
                     {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                     <span className="ml-2 hidden sm:inline">Delete</span>
                 </Button>
+            </div>
+
+            <div className="fixed top-[-9999px] left-[-9999px]">
+                <ShareImage question={question} user={user} ref={imageRef} theme={theme} />
             </div>
             
             <AlertDialog open={showModerationDialog} onOpenChange={setShowModerationDialog}>
@@ -261,7 +260,7 @@ export function DashboardClient({ user }: { user: User }) {
                             <AccordionContent className="p-6 pt-0 space-y-4">
                                <AnswerForm questionId={q.id} />
                                <div className="border-t pt-4 flex justify-end">
-                                    <QuestionActions question={q} user={user} isAnswered={false} />
+                                    <QuestionActions question={q} user={user} />
                                </div>
                             </AccordionContent>
                            </Card>
@@ -295,7 +294,7 @@ export function DashboardClient({ user }: { user: User }) {
                             <p className="text-xs text-muted-foreground">
                                 Answered {q.answeredAt instanceof Timestamp ? formatDistanceToNow(q.answeredAt.toDate(), { addSuffix: true }) : ''}
                             </p>
-                            <QuestionActions question={q} user={user} isAnswered={true} />
+                            <QuestionActions question={q} user={user} />
                         </CardFooter>
                     </Card>
                 ))
@@ -308,3 +307,5 @@ export function DashboardClient({ user }: { user: User }) {
     </Tabs>
   );
 }
+
+    
