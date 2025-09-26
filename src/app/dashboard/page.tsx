@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
 import { useUser } from "@/firebase/auth/use-user";
@@ -31,17 +31,23 @@ function DashboardSkeleton() {
                         <Skeleton className="h-10 w-10" />
                     </Card>
                 </div>
-                <div>
-                  <Skeleton className="h-10 w-full mb-2" />
-                  <Card>
-                    <CardHeader>
-                      <Skeleton className="h-6 w-48 mb-2" />
-                      <Skeleton className="h-4 w-72" />
-                    </CardHeader>
-                    <CardContent>
-                       <Skeleton className="h-24 w-full" />
-                    </CardContent>
-                  </Card>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-4">
+                        <Skeleton className="h-10 w-full" />
+                        <Card>
+                            <CardHeader>
+                                <Skeleton className="h-6 w-48 mb-2" />
+                                <Skeleton className="h-4 w-72" />
+                            </CardHeader>
+                            <CardContent>
+                                <Skeleton className="h-24 w-full" />
+                            </CardContent>
+                        </Card>
+                    </div>
+                    <div className="space-y-8">
+                        <Skeleton className="h-40 w-full" />
+                        <Skeleton className="h-64 w-full" />
+                    </div>
                 </div>
             </div>
         </div>
