@@ -249,24 +249,21 @@ export function DashboardClient({ user }: { user: User }) {
                     {unansweredQuestions.map((q) => (
                          <AccordionItem value={q.id} key={q.id} className="border-b-0">
                            <Card className="bg-secondary/50">
-                            <AccordionTrigger className="hover:no-underline p-4 sm:p-6 w-full">
-                                <div className="flex items-center justify-between w-full gap-4">
+                             <div className="flex items-center justify-between w-full gap-4 p-4 sm:p-6">
+                               <AccordionTrigger className="hover:no-underline p-0 flex-1">
                                     <div className="flex-1 text-left">
                                         <p className="font-medium text-base">{q.questionText}</p>
                                         <p className="text-sm text-muted-foreground mt-2">
                                             Received {q.createdAt instanceof Timestamp ? formatDistanceToNow(q.createdAt.toDate(), { addSuffix: true }) : ''}
                                         </p>
                                     </div>
-                                    <div className="hidden sm:flex" onClick={(e) => e.stopPropagation()}>
-                                        <QuestionActions question={q} user={user} />
-                                    </div>
+                               </AccordionTrigger>
+                                <div onClick={(e) => e.stopPropagation()}>
+                                    <QuestionActions question={q} user={user} />
                                 </div>
-                            </AccordionTrigger>
+                             </div>
                             <AccordionContent className="p-6 pt-0 space-y-4">
                                <AnswerForm questionId={q.id} />
-                               <div className="border-t pt-4 flex justify-end sm:hidden">
-                                    <QuestionActions question={q} user={user} />
-                               </div>
                             </AccordionContent>
                            </Card>
                          </AccordionItem>
