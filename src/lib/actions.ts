@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { moderateQuestion } from '@/ai/flows/question-moderation-tool';
 import { getQuestionById } from './data';
-import { getUserById } from './auth';
+import { getUserByUsername } from './auth';
 
 // --- Question Actions ---
 
@@ -18,8 +18,10 @@ export async function validateQuestion(userId: string, questionText: string) {
         return { error: `Your question was deemed inappropriate. Reason: ${moderationResult.reason}` };
         }
         
-        const user = await getUserById(userId);
-        if (user) revalidatePath(`/u/${user.username}`);
+        // Revalidation is still useful to update public profiles
+        // but we no longer need to fetch user data here.
+        revalidatePath('/dashboard');
+
 
         return { success: true };
     } catch (error) {
@@ -35,8 +37,10 @@ export async function revalidateAnswer(questionId: string) {
   }
   const question = await getQuestionById(questionId);
   if (question) {
-    const user = await getUserById(question.toUserId);
-    if(user) revalidatePath(`/u/${user.username}`);
+    const user = await getUserByUsername(question.toUserId);
+    if(user) {
+        revalidatePath(`/u/${user.username}`);
+    }
     revalidatePath('/dashboard');
   }
   return { success: true };
@@ -47,12 +51,8 @@ export async function revalidateDelete(questionId: string) {
     return { error: 'Invalid input.' };
   }
   try {
-    const question = await getQuestionById(questionId);
-    if (question) {
-      const user = await getUserById(question.toUserId);
-      if(user) revalidatePath(`/u/${user.username}`);
-      revalidatePath('/dashboard');
-    }
+    // Revalidating the dashboard is enough as it will refetch
+    revalidatePath('/dashboard');
     return { success: true };
   } catch (error) {
     console.error('Delete question error:', error);

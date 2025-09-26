@@ -12,7 +12,7 @@ import { useTransition } from 'react';
 import { Loader2 } from 'lucide-react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useAuth, useFirestore } from '@/firebase/provider';
-import { doc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
+import { doc, setDoc, getDocs, collection, query, where, serverTimestamp } from 'firebase/firestore';
 
 const formSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters.').max(20, 'Username must be at most 20 characters.').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores.'),
@@ -61,7 +61,7 @@ export function SignupForm() {
           email: values.email,
           username: values.username,
           bio: '',
-          createdAt: new Date(),
+          createdAt: serverTimestamp(),
         };
         await setDoc(doc(firestore, 'users', user.uid), newUser);
         
