@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
 import { revalidateAnswer, revalidateDelete, runModeration } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { Bot, Download, Loader2, ShieldCheck, Trash2, Wand2 } from "lucide-react";
+import { Bot, Download, Loader2, ShieldCheck, Trash2 } from "lucide-react";
 import { createRef, useState, useTransition, useEffect } from "react";
 import {
   AlertDialog,
@@ -33,9 +33,6 @@ import type { User, Question } from '@/lib/types';
 import html2canvas from 'html2canvas';
 import { ShareImage } from './share-image';
 import { useTheme } from '../theme-provider';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
-import { imageFilters } from '@/lib/filters';
 
 
 const answerSchema = z.object({
@@ -105,8 +102,6 @@ function QuestionActions({ question, user }: { question: Question, user: User })
 
     const [moderationResult, setModerationResult] = useState<ModerateQuestionOutput | null>(null);
     const [showModerationDialog, setShowModerationDialog] = useState(false);
-    const [selectedFilter, setSelectedFilter] = useState(imageFilters[0]);
-    const [filterPopoverOpen, setFilterPopoverOpen] = useState(false);
     
     const firestore = useFirestore();
     const imageRef = createRef<HTMLDivElement>();
@@ -177,38 +172,6 @@ function QuestionActions({ question, user }: { question: Question, user: User })
     return (
         <>
             <div className="flex items-center gap-1">
-                 <Popover open={filterPopoverOpen} onOpenChange={setFilterPopoverOpen}>
-                    <PopoverTrigger asChild>
-                         <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Wand2 className="h-4 w-4" />
-                            <span className="sr-only">Choose Filter</span>
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="p-0 w-48">
-                         <Command>
-                            <CommandInput placeholder="Search filters..." />
-                            <CommandList>
-                                <CommandEmpty>No filters found.</CommandEmpty>
-                                <CommandGroup>
-                                    {imageFilters.map((filter) => (
-                                    <CommandItem
-                                        key={filter.name}
-                                        value={filter.name}
-                                        onSelect={(currentValue) => {
-                                            const newFilter = imageFilters.find(f => f.name.toLowerCase() === currentValue.toLowerCase()) || imageFilters[0];
-                                            setSelectedFilter(newFilter);
-                                            setFilterPopoverOpen(false);
-                                        }}
-                                    >
-                                        {filter.name}
-                                    </CommandItem>
-                                    ))}
-                                </CommandGroup>
-                            </CommandList>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
-
                 <Button variant="ghost" size="icon" onClick={handleDownload} disabled={isDownloading} className="h-8 w-8">
                     {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                     <span className="sr-only">Download</span>
@@ -232,7 +195,6 @@ function QuestionActions({ question, user }: { question: Question, user: User })
                         user={user}
                         ref={imageRef}
                         theme={theme}
-                        filterImageUrl={selectedFilter.imageUrl}
                     />
                 </div>
             )}
@@ -371,5 +333,3 @@ export function DashboardClient({ user }: { user: User }) {
     </Tabs>
   );
 }
-
-    
