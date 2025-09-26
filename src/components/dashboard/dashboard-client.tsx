@@ -12,8 +12,8 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
 import { revalidateAnswer, revalidateDelete, runModeration } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { Bot, Loader2, ShieldCheck, Trash2 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { Bot, Download, Loader2, ShieldCheck, Trash2 } from "lucide-react";
+import { createRef, useState, useTransition } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +30,8 @@ import { useCollection } from "@/firebase/firestore/use-collection";
 import { Skeleton } from "../ui/skeleton";
 import { useFirestore } from '@/firebase/provider';
 import type { User, Question } from '@/lib/types';
+import html2canvas from 'html2canvas';
+import { ShareImage } from './share-image';
 
 
 const answerSchema = z.object({
@@ -89,13 +91,17 @@ function AnswerForm({ questionId }: { questionId: string }) {
   );
 }
 
-function QuestionActions({ question }: { question: Question }) {
+function QuestionActions({ question, isAnswered }: { question: Question, isAnswered: boolean }) {
     const { toast } = useToast();
     const [isDeleting, startDeleteTransition] = useTransition();
     const [isModerating, startModerationTransition] = useTransition();
+    const [isDownloading, startDownloadTransition] = useTransition();
+
     const [moderationResult, setModerationResult] = useState<ModerateQuestionOutput | null>(null);
     const [showModerationDialog, setShowModerationDialog] = useState(false);
     const firestore = useFirestore();
+    const imageRef = createRef<HTMLDivElement>();
+
 
     const handleDelete = async () => {
         startDeleteTransition(async () => {
@@ -119,11 +125,45 @@ function QuestionActions({ question }: { question: Question }) {
                 setShowModerationDialog(true);
             }
         });
-    }
+    };
+    
+    const handleDownload = async () => {
+        startDownloadTransition(async () => {
+             if (!imageRef.current) {
+                toast({ title: "Error", description: 'Could not create image.', variant: "destructive" });
+                return;
+            }
+            try {
+                const canvas = await html2canvas(imageRef.current, {
+                    scale: 2, // Higher scale for better resolution
+                    useCORS: true,
+                    backgroundColor: null, 
+                });
+                const dataUrl = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `incognito-question-${question.id}.png`;
+                link.href = dataUrl;
+                link.click();
+            } catch (error) {
+                 toast({ title: "Error", description: 'Failed to download image.', variant: "destructive" });
+            }
+        });
+    };
 
     return (
         <>
             <div className="flex items-center gap-2">
+                {isAnswered && (
+                    <>
+                        <Button variant="ghost" size="sm" onClick={handleDownload} disabled={isDownloading}>
+                            {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                            <span className="ml-2 hidden sm:inline">Download</span>
+                        </Button>
+                        <div className="fixed top-[-9999px] left-[-9999px]">
+                            <ShareImage question={question} ref={imageRef} />
+                        </div>
+                    </>
+                )}
                 <Button variant="ghost" size="sm" onClick={handleModeration} disabled={isModerating}>
                     {isModerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
                     <span className="ml-2 hidden sm:inline">Moderate</span>
@@ -219,7 +259,7 @@ export function DashboardClient({ user }: { user: User }) {
                             <AccordionContent className="p-6 pt-0 space-y-4">
                                <AnswerForm questionId={q.id} />
                                <div className="border-t pt-4 flex justify-end">
-                                    <QuestionActions question={q} />
+                                    <QuestionActions question={q} isAnswered={false} />
                                </div>
                             </AccordionContent>
                            </Card>
@@ -253,7 +293,7 @@ export function DashboardClient({ user }: { user: User }) {
                             <p className="text-xs text-muted-foreground">
                                 Answered {q.answeredAt instanceof Timestamp ? formatDistanceToNow(q.answeredAt.toDate(), { addSuffix: true }) : ''}
                             </p>
-                            <QuestionActions question={q} />
+                            <QuestionActions question={q} isAnswered={true} />
                         </CardFooter>
                     </Card>
                 ))
