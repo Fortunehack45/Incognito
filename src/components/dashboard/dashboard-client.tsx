@@ -13,7 +13,7 @@ import { revalidateAnswer, revalidateDelete, runModeration } from "@/lib/actions
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { Bot, Download, Loader2, ShieldCheck, Trash2, Wand2 } from "lucide-react";
-import { createRef, useState, useTransition } from "react";
+import { createRef, useState, useTransition, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -100,7 +100,8 @@ function QuestionActions({ question, user }: { question: Question, user: User })
     const { theme } = useTheme();
     const [isDeleting, startDeleteTransition] = useTransition();
     const [isModerating, startModerationTransition] = useTransition();
-    const [isDownloading, startDownloadTransition] = useTransition();
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [isPreparingImage, setIsPreparingImage] = useState(false);
 
     const [moderationResult, setModerationResult] = useState<ModerateQuestionOutput | null>(null);
     const [showModerationDialog, setShowModerationDialog] = useState(false);
@@ -135,28 +136,43 @@ function QuestionActions({ question, user }: { question: Question, user: User })
         });
     };
     
-    const handleDownload = async () => {
-        startDownloadTransition(async () => {
-             if (!imageRef.current) {
-                toast({ title: "Error", description: 'Could not create image.', variant: "destructive" });
-                return;
-            }
-            try {
-                const canvas = await html2canvas(imageRef.current, {
-                    scale: 2, // Higher scale for better resolution
-                    useCORS: true,
-                    backgroundColor: null, 
-                });
-                const dataUrl = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.download = `incognito-question-${question.id}.png`;
-                link.href = dataUrl;
-                link.click();
-            } catch (error) {
-                 toast({ title: "Error", description: 'Failed to download image.', variant: "destructive" });
-            }
-        });
+    const handleDownload = () => {
+        setIsPreparingImage(true);
     };
+
+    useEffect(() => {
+        if (isPreparingImage) {
+            setIsDownloading(true);
+            const generateImage = async () => {
+                if (!imageRef.current) {
+                    toast({ title: "Error", description: 'Could not create image. Please try again.', variant: "destructive" });
+                    setIsDownloading(false);
+                    setIsPreparingImage(false);
+                    return;
+                }
+                try {
+                    const canvas = await html2canvas(imageRef.current, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: null,
+                    });
+                    const dataUrl = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = `incognito-question-${question.id}.png`;
+                    link.href = dataUrl;
+                    link.click();
+                } catch (error) {
+                    toast({ title: "Error", description: 'Failed to download image.', variant: "destructive" });
+                } finally {
+                    setIsDownloading(false);
+                    setIsPreparingImage(false);
+                }
+            };
+
+            // Allow a short delay for the component to render before capturing
+            setTimeout(generateImage, 100);
+        }
+    }, [isPreparingImage, imageRef, question.id, toast]);
 
     return (
         <>
@@ -209,15 +225,17 @@ function QuestionActions({ question, user }: { question: Question, user: User })
                 </Button>
             </div>
 
-            <div style={{ position: 'absolute', top: 0, left: '-9999px' }}>
-                <ShareImage 
-                    question={question} 
-                    user={user} 
-                    ref={imageRef} 
-                    theme={theme}
-                    filterImageUrl={selectedFilter.imageUrl}
-                />
-            </div>
+            {isPreparingImage && (
+                <div style={{ position: 'absolute', top: 0, left: '-9999px' }}>
+                    <ShareImage
+                        question={question}
+                        user={user}
+                        ref={imageRef}
+                        theme={theme}
+                        filterImageUrl={selectedFilter.imageUrl}
+                    />
+                </div>
+            )}
             
             <AlertDialog open={showModerationDialog} onOpenChange={setShowModerationDialog}>
                 <AlertDialogContent>
