@@ -142,9 +142,7 @@
     --card: 140 60% 10%;
     --card-foreground: 140 10% 88%;
   }
-}
 
-@layer base {
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
