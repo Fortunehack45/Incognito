@@ -1,6 +1,5 @@
 'use client';
 
-import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
@@ -33,7 +32,6 @@ function DashboardSkeleton() {
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-4">
-                        <Skeleton className="h-10 w-full" />
                         <Card>
                             <CardHeader>
                                 <Skeleton className="h-6 w-48 mb-2" />
@@ -57,20 +55,18 @@ function DashboardSkeleton() {
 
 export default function DashboardPage() {
   const { user: firebaseUser, loading: loadingAuth } = useUser();
-  // Ensure useDoc path is null if firebaseUser is not available
-  const { data: appUser, loading: loadingUser } = useDoc<User>(firebaseUser?.uid ? `users/${firebaseUser.uid}`: null);
+  const { data: appUser, loading: loadingUser } = useDoc<User>(firebaseUser ? `users/${firebaseUser.uid}`: null);
   
-  // Show skeleton while auth or user data is loading
   if (loadingAuth || (firebaseUser && loadingUser)) {
     return <DashboardSkeleton />;
   }
 
-  // On the client, if auth has loaded and there's no user, redirect.
   if (!loadingAuth && !firebaseUser) {
-    return redirect("/login");
+    // The useUser hook will handle the redirect. Returning null prevents
+    // the rest of the component from trying to render with no user.
+    return null;
   }
   
-  // This can happen if the user record in firestore is deleted but the auth user still exists
   if (!appUser) {
     return (
        <div className="container mx-auto px-4 py-8">
