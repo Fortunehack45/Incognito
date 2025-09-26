@@ -150,12 +150,10 @@
     --foreground: 140 10% 88%;
     --card: 140 60% 10%;
     --card-foreground: 140 10% 88%;
-    * {
-      border-color: hsl(var(--border));
-    }
-    body {
-      background-color: hsl(var(--background));
-      color: hsl(var(--foreground));
-    }
+  }
+  
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 }
