@@ -10,7 +10,7 @@ export default function Home() {
   const { user, loading } = useUser();
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-16">
+    <div className="container mx-auto px-4 py-12 md:py-24">
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">
           <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tight text-foreground">
@@ -42,7 +42,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex justify-center">
-          <Card className="w-full max-w-md shadow-2xl transform hover:scale-105 transition-transform duration-300 bg-secondary/50">
+          <Card className="w-full max-w-md shadow-2xl transform hover:scale-105 transition-transform duration-300 bg-card">
             <CardHeader>
               <CardTitle>Example Question</CardTitle>
               <CardDescription>This is how questions will appear on your profile.</CardDescription>
