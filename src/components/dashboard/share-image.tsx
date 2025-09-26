@@ -5,16 +5,18 @@ import { Logo } from "../logo";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Theme } from "../theme-provider";
+import Image from "next/image";
 
 interface ShareImageProps {
   question: Question;
   user: User;
   theme: Theme;
+  filterImageUrl?: string | null;
 }
 
 // Using forwardRef to pass the ref to the underlying div element
 export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
-  ({ question, user, theme }, ref) => {
+  ({ question, user, theme, filterImageUrl }, ref) => {
     
     const dateToFormat = question.answeredAt || question.createdAt;
     const dateLabel = question.answeredAt ? 'Answered on' : 'Received on';
@@ -23,16 +25,28 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
       <div
         ref={ref}
         className={cn(
-            "w-[600px] p-8 bg-background text-foreground border border-border",
+            "relative w-[600px] p-8 bg-background text-foreground border border-border overflow-hidden",
             theme
         )}
         // Ensure the component has a fixed size for consistent image output
         style={{ width: 600, height: 'auto' }}
       >
-        <div className="space-y-6">
+        {filterImageUrl && (
+            <div className="absolute inset-0">
+                <Image 
+                    src={filterImageUrl}
+                    alt="Filter background"
+                    fill
+                    className="object-cover"
+                />
+                 <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
+            </div>
+        )}
+
+        <div className="relative z-10 space-y-6">
             <Logo />
             
-            <div className="space-y-4 p-6 bg-card rounded-lg border border-border shadow-lg">
+            <div className="space-y-4 p-6 bg-card/80 rounded-lg border border-border shadow-lg backdrop-blur-md">
                 <div>
                     <p className="text-sm text-muted-foreground font-sans">Anonymous asked:</p>
                     <p className="text-xl font-semibold font-sans mt-1">
@@ -64,5 +78,3 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
 );
 
 ShareImage.displayName = "ShareImage";
-
-    
