@@ -69,7 +69,7 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
 
             <div className="flex justify-between items-center text-sm text-muted-foreground font-sans">
                  <span>@{user.username}</span>
-                 <span>{dateLabel} {dateToFormat ? format(new Date(dateToFormat as any), 'MMMM d, yyyy') : ''}</span>
+                 <span>{dateLabel} {dateToFormat ? format(new Date(dateToFormat as any), "MMMM d, yyyy 'at' h:mm a") : ''}</span>
             </div>
         </div>
       </div>
