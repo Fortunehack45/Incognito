@@ -59,6 +59,7 @@ export default function ProfilePage() {
   useEffect(() => {
     async function fetchUser() {
       if (!username) return;
+      // This now calls the client-side function
       const fetchedUser = await getUserByUsername(username);
       if (!fetchedUser) {
         notFound();
