@@ -62,6 +62,7 @@ export function SignupForm() {
           username: values.username,
           bio: '',
           createdAt: serverTimestamp(),
+          isModerationEnabled: false, // Default to false
         };
         await setDoc(doc(firestore, 'users', user.uid), newUser);
         

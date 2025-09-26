@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { moderateQuestion } from '@/ai/flows/question-moderation-tool';
 import { getQuestionById } from './data';
+import { firestore } from '@/firebase/admin';
 
 // --- Question Actions ---
 
@@ -12,17 +13,16 @@ export async function validateQuestion(userId: string, questionText: string) {
     }
 
     try {
-        const moderationResult = await moderateQuestion({ questionText });
-        if (!moderationResult.isAppropriate) {
-        return { error: `Your question was deemed inappropriate. Reason: ${moderationResult.reason}` };
+        const user = await getUserById(userId);
+
+        if (user?.isModerationEnabled) {
+            const moderationResult = await moderateQuestion({ questionText });
+            if (!moderationResult.isAppropriate) {
+            return { error: `Your question was deemed inappropriate. Reason: ${moderationResult.reason}` };
+            }
         }
         
         revalidatePath('/dashboard');
-
-        // We also need to revalidate the public user profile page
-        // This is a bit tricky since we only have the userId. We'd need to fetch the user to get their username.
-        // For now, revalidating the dashboard is the most direct impact.
-        // A more robust solution might involve passing the username or revalidating the path on the client after submission.
 
         return { success: true };
     } catch (error) {
@@ -83,9 +83,8 @@ export async function runModeration(questionId: string) {
 }
 
 // Helper function to get user by ID, useful for revalidation
-async function getUserById(userId: string) {
+export async function getUserById(userId: string) {
     try {
-        const firestore = (await import('@/firebase/admin')).firestore;
         const userDoc = await firestore.collection('users').doc(userId).get();
         if (!userDoc.exists) return null;
         return userDoc.data();

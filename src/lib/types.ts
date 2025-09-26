@@ -6,6 +6,7 @@ export type User = {
   email: string;
   bio: string | null;
   createdAt: Date | Timestamp;
+  isModerationEnabled: boolean;
 };
 
 export type Question = {

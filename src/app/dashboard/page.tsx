@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 import { NotesSection } from "@/components/dashboard/notes-section";
+import { UserSettings } from "@/components/dashboard/user-settings";
 
 function DashboardSkeleton() {
     return (
@@ -105,7 +106,8 @@ export default function DashboardPage() {
           <div className="lg:col-span-2">
             <DashboardClient user={appUser} />
           </div>
-          <div>
+          <div className="space-y-8">
+            <UserSettings user={appUser} />
             <NotesSection user={appUser} />
           </div>
         </div>
