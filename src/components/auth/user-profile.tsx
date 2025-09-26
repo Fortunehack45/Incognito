@@ -17,7 +17,6 @@ export function UserProfile({ firebaseUser }: { firebaseUser: FirebaseUser }) {
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const avatarImageUrl = "https://images.unsplash.com/photo-1613145997970-db84a7975fbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwcm9maWxlJTIwcGVyc29ufGVufDB8fHx8MTc1ODgxOTAzNXww&ixlib=rb-4.1.0&q=80&w=1080";
 
   const handleLogout = async () => {
     try {
@@ -40,7 +39,6 @@ export function UserProfile({ firebaseUser }: { firebaseUser: FirebaseUser }) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarImage src={avatarImageUrl} alt={appUser.username} />
             <AvatarFallback>{fallback}</AvatarFallback>
           </Avatar>
         </Button>
