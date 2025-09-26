@@ -144,6 +144,28 @@
     --card-foreground: 140 10% 88%;
   }
 
+  .yellow {
+    --background: 48 96% 96%;
+    --foreground: 48 95% 10%;
+    --card: 48 96% 96%;
+    --card-foreground: 48 95% 10%;
+    --popover: 48 96% 96%;
+    --popover-foreground: 48 95% 10%;
+    --primary: 48 90% 55%;
+    --primary-foreground: 48 95% 10%;
+    --secondary: 48 80% 90%;
+    --secondary-foreground: 48 95% 10%;
+    --muted: 48 80% 90%;
+    --muted-foreground: 48 40% 40%;
+    --accent: 48 80% 90%;
+    --accent-foreground: 48 90% 55%;
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 48 80% 85%;
+    --input: 48 80% 85%;
+    --ring: 48 90% 55%;
+  }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));

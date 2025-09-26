@@ -47,7 +47,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="orange">
       <FirebaseProvider>
         <div className="flex flex-col min-h-screen">
           <Header />
