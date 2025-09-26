@@ -1,32 +1,46 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
+    
     // --- Users Collection ---
-    // Anyone can read public user profiles.
-    // A user can only create or update their own profile.
+    // User profiles are public, but only the owner can create or modify their own.
     match /users/{userId} {
-      allow read: if true;
-      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow read;
+      
+      // A user can create their profile if:
+      // 1. They are creating their own document (their auth uid matches the document id).
+      // 2. The username they are trying to use does not already exist.
+      allow create: if request.auth.uid == userId &&
+                      !exists(/databases/$(database)/documents/users/$(request.resource.data.username));
+
+      // A user can update their profile if:
+      // 1. They are updating their own document.
+      // 2. If they are changing their username, the new username must not already exist.
+      allow update: if request.auth.uid == userId &&
+                      (request.resource.data.username == resource.data.username || 
+                       !exists(/databases/$(database)/documents/users/$(request.resource.data.username)));
     }
 
     // --- Questions Collection ---
-    // - Anyone can create (ask) a question.
-    // - Anyone can read answered questions.
-    // - Only the recipient can read their unanswered questions.
-    // - Only the recipient can update (answer) or delete their questions.
+    // Anyone can create a question.
+    // Answered questions are public.
+    // Unanswered questions are private to the recipient.
     match /questions/{questionId} {
-      allow read: if resource.data.isAnswered == true;
-      allow create: if true;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.toUserId;
+      allow create;
+
+      // Allow reads if the question is answered OR the reader is the recipient.
+      allow read: if resource.data.isAnswered == true || resource.data.toUserId == request.auth.uid;
+      
+      // Allow updates/deletes only by the recipient.
+      allow update, delete: if resource.data.toUserId == request.auth.uid;
     }
 
     // --- Notes Subcollection ---
-    // A user can only read/write/delete their own notes.
+    // Notes are private to the user who owns them.
     match /users/{userId}/notes/{noteId} {
-      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      // Allow full access only if the user's auth uid matches the parent user document id.
+      allow read, create, delete, update: if request.auth.uid == userId;
     }
   }
 }
