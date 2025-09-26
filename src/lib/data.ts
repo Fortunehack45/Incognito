@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Question } from './types';
+import type { Question, User } from './types';
 import { firestore } from '@/firebase/admin';
 
 const questionsCollection = firestore.collection('questions');
@@ -41,4 +41,27 @@ export async function getQuestionById(questionId: string): Promise<Question | un
     } as Question;
   }
   return undefined;
+}
+
+
+// Helper function to get user by ID, useful for revalidation
+export async function getUserById(userId: string): Promise<User | null> {
+    try {
+        const userDoc = await firestore.collection('users').doc(userId).get();
+        if (!userDoc.exists) return null;
+        // Important: We need to return a plain object, not a Firestore document
+        const data = userDoc.data();
+        if (!data) return null;
+        return {
+            id: userDoc.id,
+            username: data.username,
+            email: data.email,
+            bio: data.bio || null,
+            createdAt: data.createdAt, // This will be a Timestamp
+            isModerationEnabled: data.isModerationEnabled || false,
+        } as User;
+    } catch (error) {
+        console.error("Failed to get user by ID", error);
+        return null;
+    }
 }
