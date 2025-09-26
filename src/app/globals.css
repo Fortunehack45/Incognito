@@ -57,7 +57,17 @@
     --ring: 216 34% 90%;
   }
 
-  .pink {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+.pink {
     --background: 340 60% 12%;
     --foreground: 340 10% 88%;
     --card: 340 60% 12%;
@@ -77,9 +87,9 @@
     --border: 340 40% 20%;
     --input: 340 40% 20%;
     --ring: 340 90% 70%;
-  }
+}
   
-  .blue {
+.blue {
     --background: 220 50% 15%;
     --foreground: 220 15% 90%;
     --card: 220 50% 15%;
@@ -99,9 +109,9 @@
     --border: 220 40% 25%;
     --input: 220 40% 25%;
     --ring: 210 100% 70%;
-  }
+}
 
-  .purple {
+.purple {
     --background: 260 50% 12%;
     --foreground: 260 15% 88%;
     --card: 260 50% 12%;
@@ -121,9 +131,9 @@
     --border: 260 40% 22%;
     --input: 260 40% 22%;
     --ring: 270 90% 70%;
-  }
+}
   
-  .orange {
+.orange {
     --background: 25 60% 12%;
     --foreground: 25 10% 88%;
     --card: 25 60% 12%;
@@ -143,9 +153,9 @@
     --border: 25 40% 20%;
     --input: 25 40% 20%;
     --ring: 30 90% 60%;
-  }
+}
 
-  .green {
+.green {
     --background: 140 60% 10%;
     --foreground: 140 10% 88%;
     --card: 140 60% 10%;
@@ -165,9 +175,9 @@
     --border: 140 40% 18%;
     --input: 140 40% 18%;
     --ring: 150 80% 50%;
-  }
+}
 
-  .yellow {
+.yellow {
     --background: 40 60% 12%;
     --foreground: 40 10% 88%;
     --card: 40 60% 12%;
@@ -187,5 +197,4 @@
     --border: 40 40% 20%;
     --input: 40 40% 20%;
     --ring: 50 90% 60%;
-  }
 }
