@@ -1,7 +1,7 @@
 'use client';
 import { getUserByUsername } from "@/lib/auth";
-import { notFound } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { notFound, useParams } from "next/navigation";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { AskQuestionForm } from "@/components/profile/ask-question-form";
@@ -49,13 +49,17 @@ function ProfileSkeleton() {
 }
 
 
-export default function ProfilePage({ params }: { params: { username: string } }) {
+export default function ProfilePage() {
+  const params = useParams();
+  const username = Array.isArray(params.username) ? params.username[0] : params.username;
+  
   const [user, setUser] = useState<User | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
   useEffect(() => {
     async function fetchUser() {
-      const fetchedUser = await getUserByUsername(params.username);
+      if (!username) return;
+      const fetchedUser = await getUserByUsername(username);
       if (!fetchedUser) {
         notFound();
       } else {
@@ -64,7 +68,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       setLoadingUser(false);
     }
     fetchUser();
-  }, [params.username]);
+  }, [username]);
 
   const { data: allQuestions, loading: loadingQuestions } = useCollection<Question>(
     user ? 'questions' : null, 
