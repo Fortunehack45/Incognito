@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import type { User } from '@/lib/types';
-import { ShieldQuestion } from 'lucide-react';
+import { Bot } from 'lucide-react';
 
 export function UserSettings({ user }: { user: User }) {
   const firestore = useFirestore();
@@ -39,11 +39,11 @@ export function UserSettings({ user }: { user: User }) {
       </CardHeader>
       <CardContent>
         <div className="flex items-center space-x-4 rounded-md border p-4">
-            <ShieldQuestion />
+            <Bot />
             <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium leading-none">
-                AI Question Moderation
-                </p>
+                <Label htmlFor="moderation-switch" className="text-sm font-medium leading-none">
+                 AI Question Moderation
+                </Label>
                 <p className="text-sm text-muted-foreground">
                 Automatically block inappropriate questions.
                 </p>

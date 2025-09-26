@@ -163,10 +163,12 @@ function QuestionActions({ question }: { question: Question }) {
 const LoadingSkeleton = () => (
     <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
-            <div key={i} className="p-4 border rounded-lg">
-                <Skeleton className="h-6 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/4" />
-            </div>
+             <Card key={i}>
+                <CardHeader>
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-4 w-1/4" />
+                </CardHeader>
+            </Card>
         ))}
     </div>
 )
@@ -182,8 +184,8 @@ export function DashboardClient({ user }: { user: User }) {
   const answeredQuestions = questions?.filter(q => q.isAnswered) || [];
 
   const EmptyState = ({ title, description }: { title: string, description: string }) => (
-    <div className="text-center py-16 px-4">
-        <h3 className="text-xl font-semibold">{title}</h3>
+    <div className="text-center py-16 px-4 border border-dashed rounded-lg">
+        <h3 className="text-xl font-semibold font-headline">{title}</h3>
         <p className="text-muted-foreground mt-2">{description}</p>
     </div>
   );
@@ -195,30 +197,32 @@ export function DashboardClient({ user }: { user: User }) {
         <TabsTrigger value="answered">Answered ({answeredQuestions.length})</TabsTrigger>
       </TabsList>
       <TabsContent value="unanswered">
-        <Card>
+        <Card className="border-none shadow-none">
           <CardHeader>
             <CardTitle>Unanswered Questions</CardTitle>
             <CardDescription>Answer these questions to have them appear on your public profile.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {loading ? <LoadingSkeleton /> : unansweredQuestions.length > 0 ? (
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible className="w-full space-y-4">
                     {unansweredQuestions.map((q) => (
-                         <AccordionItem value={q.id} key={q.id} className="border rounded-lg px-4 bg-secondary/50">
-                            <AccordionTrigger className="hover:no-underline">
+                         <AccordionItem value={q.id} key={q.id} className="border-b-0">
+                           <Card className="bg-secondary/50">
+                            <AccordionTrigger className="hover:no-underline p-6">
                                 <div className="flex-1 text-left">
-                                    <p className="font-medium">{q.questionText}</p>
-                                    <p className="text-sm text-muted-foreground mt-1">
+                                    <p className="font-medium text-base">{q.questionText}</p>
+                                    <p className="text-sm text-muted-foreground mt-2">
                                         Received {q.createdAt instanceof Timestamp ? formatDistanceToNow(q.createdAt.toDate(), { addSuffix: true }) : ''}
                                     </p>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent className="space-y-4">
+                            <AccordionContent className="p-6 pt-0 space-y-4">
                                <AnswerForm questionId={q.id} />
                                <div className="border-t pt-4 flex justify-end">
                                     <QuestionActions question={q} />
                                </div>
                             </AccordionContent>
+                           </Card>
                          </AccordionItem>
                     ))}
                 </Accordion>
@@ -229,7 +233,7 @@ export function DashboardClient({ user }: { user: User }) {
         </Card>
       </TabsContent>
       <TabsContent value="answered">
-        <Card>
+        <Card className="border-none shadow-none">
           <CardHeader>
             <CardTitle>Answered Questions</CardTitle>
             <CardDescription>These are publicly visible on your profile.</CardDescription>
@@ -239,10 +243,8 @@ export function DashboardClient({ user }: { user: User }) {
                 answeredQuestions.map((q) => (
                     <Card key={q.id} className="bg-secondary/50">
                         <CardHeader>
+                            <CardDescription>Anonymous asked:</CardDescription>
                             <CardTitle className="text-lg font-normal">{q.questionText}</CardTitle>
-                            <CardDescription>
-                                Asked {q.createdAt instanceof Timestamp ? formatDistanceToNow(q.createdAt.toDate(), { addSuffix: true }) : ''}
-                            </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <p className="border-l-2 border-primary pl-4 text-muted-foreground italic">"{q.answerText}"</p>

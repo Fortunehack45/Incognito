@@ -25,10 +25,10 @@ const noteSchema = z.object({
 const LoadingSkeleton = () => (
     <div className="space-y-3">
         {[...Array(2)].map((_, i) => (
-            <Card key={i}>
+            <Card key={i} className="bg-secondary/50 border-none">
                 <CardContent className="pt-4 space-y-2">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-10 w-full bg-secondary" />
+                    <Skeleton className="h-4 w-1/2 bg-secondary" />
                 </CardContent>
             </Card>
         ))}
@@ -115,7 +115,7 @@ export function NotesSection({ user }: { user: User }) {
         <div className="space-y-4">
             {loading ? <LoadingSkeleton /> : notes && notes.length > 0 ? (
                 notes.map((note) => (
-                    <Card key={note.id} className="bg-secondary/50">
+                    <Card key={note.id} className="bg-secondary/50 border-none">
                         <CardContent className="pt-4">
                             <p className="text-sm">{note.contentText}</p>
                         </CardContent>

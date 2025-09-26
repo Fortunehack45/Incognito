@@ -11,8 +11,8 @@ export default function Home() {
   const heroImage = {
       "id": "hero-questions",
       "description": "An abstract image representing questions and curiosity",
-      "imageUrl": "https://images.unsplash.com/photo-1699993131854-a1cde51ce9da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMHF1ZXN0aW9ufGVufDB8fHx8MTc1ODgzMDI2MHww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "abstract question"
+      "imageUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGxhbmRzY2FwZXxlbnwwfHx8fDE3NTg4NTY5OTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract landscape"
     };
   const { user, loading } = useUser();
 
@@ -49,7 +49,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex justify-center">
-          <Card className="w-full max-w-md shadow-2xl transform hover:scale-105 transition-transform duration-300">
+          <Card className="w-full max-w-md shadow-2xl transform hover:scale-105 transition-transform duration-300 bg-secondary/50">
             <CardHeader>
               <CardTitle>Example Question</CardTitle>
               <CardDescription>This is how questions will appear on your profile.</CardDescription>

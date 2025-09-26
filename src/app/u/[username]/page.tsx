@@ -37,6 +37,12 @@ function ProfileSkeleton() {
       </Card>
       <div className="space-y-4">
         <Skeleton className="h-8 w-56" />
+         <Card>
+            <CardContent className="pt-6 space-y-4">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-4 w-32" />
+            </CardContent>
+        </Card>
         <Card>
             <CardContent className="pt-6 space-y-4">
                 <Skeleton className="h-20 w-full" />
@@ -59,7 +65,6 @@ export default function ProfilePage() {
   useEffect(() => {
     async function fetchUser() {
       if (!username) return;
-      // This now calls the client-side function
       const fetchedUser = await getUserByUsername(username);
       if (!fetchedUser) {
         notFound();
@@ -93,11 +98,11 @@ export default function ProfilePage() {
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-col sm:flex-row items-center gap-6 p-6">
             <Avatar className="h-24 w-24 border-4 border-primary">
-              <AvatarFallback className="text-3xl">{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback className="text-3xl font-headline">{user.username.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="text-center sm:text-left">
               <CardTitle className="text-3xl font-headline">@{user.username}</CardTitle>
-              {user.bio && <CardDescription className="mt-2 text-lg">{user.bio}</CardDescription>}
+              {user.bio && <CardDescription className="mt-2 text-lg text-muted-foreground">{user.bio}</CardDescription>}
             </div>
           </CardHeader>
         </Card>
@@ -110,13 +115,13 @@ export default function ProfilePage() {
           <h2 className="text-2xl font-bold font-headline">Answered Questions</h2>
           {answeredQuestions.length > 0 ? (
             answeredQuestions.map((q) => (
-              <Card key={q.id}>
+              <Card key={q.id} className="bg-secondary/50">
                 <CardHeader>
                   <CardDescription>Anonymous asked:</CardDescription>
                   <CardTitle className="text-xl font-medium leading-relaxed">{q.questionText}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="border-l-4 border-accent pl-4 text-foreground/80">{q.answerText}</p>
+                  <p className="border-l-4 border-accent pl-4 text-foreground/80 italic">"{q.answerText}"</p>
                 </CardContent>
                 <CardFooter>
                   <p className="text-sm text-muted-foreground">
@@ -126,7 +131,7 @@ export default function ProfilePage() {
               </Card>
             ))
           ) : (
-            <Card>
+            <Card className="border-dashed">
               <CardContent className="pt-6">
                 <p className="text-center text-muted-foreground">@{user.username} hasn't answered any questions yet.</p>
               </CardContent>
