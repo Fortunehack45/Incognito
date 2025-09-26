@@ -32,6 +32,7 @@ import { useFirestore } from '@/firebase/provider';
 import type { User, Question } from '@/lib/types';
 import html2canvas from 'html2canvas';
 import { ShareImage } from './share-image';
+import { useTheme } from '../theme-provider';
 
 
 const answerSchema = z.object({
@@ -93,6 +94,7 @@ function AnswerForm({ questionId }: { questionId: string }) {
 
 function QuestionActions({ question, isAnswered }: { question: Question, isAnswered: boolean }) {
     const { toast } = useToast();
+    const { theme } = useTheme();
     const [isDeleting, startDeleteTransition] = useTransition();
     const [isModerating, startModerationTransition] = useTransition();
     const [isDownloading, startDownloadTransition] = useTransition();
@@ -160,7 +162,7 @@ function QuestionActions({ question, isAnswered }: { question: Question, isAnswe
                             <span className="ml-2 hidden sm:inline">Download</span>
                         </Button>
                         <div className="fixed top-[-9999px] left-[-9999px]">
-                            <ShareImage question={question} ref={imageRef} />
+                            <ShareImage question={question} ref={imageRef} theme={theme} />
                         </div>
                     </>
                 )}
@@ -306,3 +308,5 @@ export function DashboardClient({ user }: { user: User }) {
     </Tabs>
   );
 }
+
+    

@@ -3,14 +3,17 @@ import { Question } from "@/lib/types";
 import { forwardRef } from "react";
 import { Logo } from "../logo";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Theme } from "../theme-provider";
 
 interface ShareImageProps {
   question: Question;
+  theme: Theme;
 }
 
 // Using forwardRef to pass the ref to the underlying div element
 export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
-  ({ question }, ref) => {
+  ({ question, theme }, ref) => {
     
     // This component is not rendered in the main DOM tree in a visible way.
     // It's rendered off-screen and used by html2canvas to generate an image.
@@ -21,7 +24,10 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
     return (
       <div
         ref={ref}
-        className="w-[600px] p-8 bg-background text-foreground border border-border"
+        className={cn(
+            "w-[600px] p-8 bg-background text-foreground border border-border",
+            theme
+        )}
         // Ensure the component has a fixed size for consistent image output
         style={{ width: 600, height: 'auto' }}
       >
@@ -57,3 +63,5 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
 );
 
 ShareImage.displayName = "ShareImage";
+
+    

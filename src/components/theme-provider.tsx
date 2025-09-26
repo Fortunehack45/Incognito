@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react"
 
-type Theme = "light" | "dark" | "pink" | "blue" | "purple" | "orange" | "green" | "yellow"
+export type Theme = "light" | "dark" | "pink" | "blue" | "purple" | "orange" | "green" | "yellow"
 
 type ThemeProviderProps = {
   children: React.ReactNode
@@ -70,3 +70,5 @@ export const useTheme = () => {
 
   return context
 }
+
+    
