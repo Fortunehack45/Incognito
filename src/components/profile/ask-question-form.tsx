@@ -35,8 +35,8 @@ export function AskQuestionForm({ user }: { user: User }) {
 
   async function onSubmit(values: FormValues) {
     setIsPending(true);
-    // The server action now takes the full user object
-    const result = await validateQuestion(user, values.questionText);
+    // Pass only the necessary primitive values to the server action
+    const result = await validateQuestion(user.id, user.isModerationEnabled, values.questionText);
     
     if (result.error) {
         toast({

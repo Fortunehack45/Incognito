@@ -8,26 +8,32 @@ import type { User } from './types';
 
 // --- Question Actions ---
 
-export async function validateQuestion(user: User, questionText: string) {
-    if (!user || !questionText) {
-        return { error: 'Invalid input.' };
+export async function validateQuestion(
+  userId: string,
+  isModerationEnabled: boolean,
+  questionText: string
+) {
+  if (!userId || !questionText) {
+    return { error: 'Invalid input.' };
+  }
+
+  try {
+    if (isModerationEnabled) {
+      const moderationResult = await moderateQuestion({ questionText });
+      if (!moderationResult.isAppropriate) {
+        return {
+          error: `Your question was deemed inappropriate. Reason: ${moderationResult.reason}`,
+        };
+      }
     }
 
-    try {
-        if (user.isModerationEnabled) {
-            const moderationResult = await moderateQuestion({ questionText });
-            if (!moderationResult.isAppropriate) {
-                return { error: `Your question was deemed inappropriate. Reason: ${moderationResult.reason}` };
-            }
-        }
-        
-        revalidatePath('/dashboard');
+    revalidatePath('/dashboard');
 
-        return { success: true };
-    } catch (error) {
-        console.error('Submit question error:', error);
-        return { error: 'Failed to submit question.' };
-    }
+    return { success: true };
+  } catch (error) {
+    console.error('Submit question error:', error);
+    return { error: 'Failed to submit question.' };
+  }
 }
 
 
