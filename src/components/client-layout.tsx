@@ -6,6 +6,7 @@ import { Header } from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
 import { Skeleton } from "./ui/skeleton";
 import { useEffect, useState } from "react";
+import { Footer } from "./footer";
 
 function AppSkeleton() {
     return (
@@ -51,6 +52,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col min-h-screen">
           <Header />
           <main className="flex-grow">{children}</main>
+          <Footer />
         </div>
         <Toaster />
       </FirebaseProvider>
