@@ -155,19 +155,19 @@ function QuestionActions({ question, user }: { question: Question, user: User })
     return (
         <>
             <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handleDownload} disabled={isDownloading}>
+                <Button variant="ghost" size="icon" onClick={handleDownload} disabled={isDownloading} className="h-8 w-8">
                     {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                    <span className="ml-2 hidden sm:inline">Download</span>
+                    <span className="sr-only">Download</span>
                 </Button>
                 
-                <Button variant="ghost" size="sm" onClick={handleModeration} disabled={isModerating}>
+                <Button variant="ghost" size="icon" onClick={handleModeration} disabled={isModerating} className="h-8 w-8">
                     {isModerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
-                    <span className="ml-2 hidden sm:inline">Moderate</span>
+                     <span className="sr-only">Moderate</span>
                 </Button>
                 
-                <Button variant="ghost" size="sm" onClick={handleDelete} disabled={isDeleting} className="text-destructive hover:text-destructive">
+                <Button variant="ghost" size="icon" onClick={handleDelete} disabled={isDeleting} className="text-destructive hover:text-destructive h-8 w-8">
                     {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                    <span className="ml-2 hidden sm:inline">Delete</span>
+                     <span className="sr-only">Delete</span>
                 </Button>
             </div>
 
@@ -249,17 +249,22 @@ export function DashboardClient({ user }: { user: User }) {
                     {unansweredQuestions.map((q) => (
                          <AccordionItem value={q.id} key={q.id} className="border-b-0">
                            <Card className="bg-secondary/50">
-                            <AccordionTrigger className="hover:no-underline p-6">
-                                <div className="flex-1 text-left">
-                                    <p className="font-medium text-base">{q.questionText}</p>
-                                    <p className="text-sm text-muted-foreground mt-2">
-                                        Received {q.createdAt instanceof Timestamp ? formatDistanceToNow(q.createdAt.toDate(), { addSuffix: true }) : ''}
-                                    </p>
+                            <AccordionTrigger className="hover:no-underline p-4 sm:p-6 w-full">
+                                <div className="flex items-center justify-between w-full gap-4">
+                                    <div className="flex-1 text-left">
+                                        <p className="font-medium text-base">{q.questionText}</p>
+                                        <p className="text-sm text-muted-foreground mt-2">
+                                            Received {q.createdAt instanceof Timestamp ? formatDistanceToNow(q.createdAt.toDate(), { addSuffix: true }) : ''}
+                                        </p>
+                                    </div>
+                                    <div className="hidden sm:flex" onClick={(e) => e.stopPropagation()}>
+                                        <QuestionActions question={q} user={user} />
+                                    </div>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="p-6 pt-0 space-y-4">
                                <AnswerForm questionId={q.id} />
-                               <div className="border-t pt-4 flex justify-end">
+                               <div className="border-t pt-4 flex justify-end sm:hidden">
                                     <QuestionActions question={q} user={user} />
                                </div>
                             </AccordionContent>
@@ -307,5 +312,3 @@ export function DashboardClient({ user }: { user: User }) {
     </Tabs>
   );
 }
-
-    
