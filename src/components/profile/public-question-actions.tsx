@@ -82,7 +82,7 @@ export function PublicQuestionActions({ question, user }: { question: Question, 
                 <span className="ml-2 hidden sm:inline">Download</span>
             </Button>
 
-            <div className="fixed top-[-9999px] left-[-9999px]">
+            <div className="absolute top-0 left-0" style={{ zIndex: -1, visibility: 'hidden' }}>
                 <ShareImage 
                     question={question} 
                     user={user} 

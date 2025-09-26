@@ -209,7 +209,7 @@ function QuestionActions({ question, user }: { question: Question, user: User })
                 </Button>
             </div>
 
-            <div className="fixed top-[-9999px] left-[-9999px]">
+            <div className="absolute top-0 left-0" style={{ zIndex: -1, visibility: 'hidden' }}>
                 <ShareImage 
                     question={question} 
                     user={user} 
