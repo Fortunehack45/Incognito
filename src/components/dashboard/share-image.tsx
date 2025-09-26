@@ -36,8 +36,9 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
                 <Image 
                     src={filterImageUrl}
                     alt="Filter background"
-                    fill
-                    className="object-cover"
+                    width={600}
+                    height={400}
+                    className="object-cover w-full h-full"
                 />
                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
             </div>
