@@ -3,17 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import Image from "next/image";
 import { useUser } from "@/firebase/auth/use-user";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
-  const heroImage = {
-      "id": "hero-questions",
-      "description": "An abstract image representing questions and curiosity",
-      "imageUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGxhbmRzY2FwZXxlbnwwfHx8fDE3NTg4NTY5OTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "abstract landscape"
-    };
   const { user, loading } = useUser();
 
   return (
@@ -55,17 +48,6 @@ export default function Home() {
               <CardDescription>This is how questions will appear on your profile.</CardDescription>
             </CardHeader>
             <CardContent>
-              {heroImage && (
-                <div className="aspect-video relative rounded-md overflow-hidden mb-4">
-                  <Image
-                    src={heroImage.imageUrl}
-                    alt={heroImage.description}
-                    fill
-                    className="object-cover"
-                    data-ai-hint={heroImage.imageHint}
-                  />
-                </div>
-              )}
               <div className="space-y-4">
                   <p className="font-semibold text-muted-foreground">Anonymous asked:</p>
                   <p className="text-lg font-medium">"If you could have any superpower, what would it be and why?"</p>
