@@ -1,5 +1,5 @@
 'use client';
-import { Question } from "@/lib/types";
+import { Question, User } from "@/lib/types";
 import { forwardRef } from "react";
 import { Logo } from "../logo";
 import { format } from "date-fns";
@@ -8,12 +8,13 @@ import { Theme } from "../theme-provider";
 
 interface ShareImageProps {
   question: Question;
+  user: User;
   theme: Theme;
 }
 
 // Using forwardRef to pass the ref to the underlying div element
 export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
-  ({ question, theme }, ref) => {
+  ({ question, user, theme }, ref) => {
     
     // This component is not rendered in the main DOM tree in a visible way.
     // It's rendered off-screen and used by html2canvas to generate an image.
@@ -53,7 +54,7 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
             </div>
 
             <div className="flex justify-between items-center text-sm text-muted-foreground font-sans">
-                 <span>@{question.toUserId}</span>
+                 <span>@{user.username}</span>
                  <span>Answered on {question.answeredAt ? format(new Date(question.answeredAt as any), 'MMMM d, yyyy') : ''}</span>
             </div>
         </div>
@@ -63,5 +64,3 @@ export const ShareImage = forwardRef<HTMLDivElement, ShareImageProps>(
 );
 
 ShareImage.displayName = "ShareImage";
-
-    

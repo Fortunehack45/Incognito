@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import type { Question, User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCollection } from "@/firebase/firestore/use-collection";
+import { PublicQuestionActions } from "@/components/profile/public-question-actions";
 
 
 function ProfileSkeleton() {
@@ -65,6 +66,7 @@ export default function ProfilePage() {
   useEffect(() => {
     async function fetchUser() {
       if (!username) return;
+      setLoadingUser(true);
       const fetchedUser = await getUserByUsername(username);
       if (!fetchedUser) {
         notFound();
@@ -123,10 +125,11 @@ export default function ProfilePage() {
                 <CardContent>
                   <p className="border-l-4 border-accent pl-4 text-foreground/80 italic">"{q.answerText}"</p>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex justify-between items-center">
                   <p className="text-sm text-muted-foreground">
                     Answered {q.answeredAt ? formatDistanceToNow(q.answeredAt, { addSuffix: true }) : 'a while ago'}
                   </p>
+                  <PublicQuestionActions question={q} user={user} />
                 </CardFooter>
               </Card>
             ))

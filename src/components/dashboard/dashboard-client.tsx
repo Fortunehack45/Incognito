@@ -92,7 +92,7 @@ function AnswerForm({ questionId }: { questionId: string }) {
   );
 }
 
-function QuestionActions({ question, isAnswered }: { question: Question, isAnswered: boolean }) {
+function QuestionActions({ question, user, isAnswered }: { question: Question, user: User, isAnswered: boolean }) {
     const { toast } = useToast();
     const { theme } = useTheme();
     const [isDeleting, startDeleteTransition] = useTransition();
@@ -162,7 +162,7 @@ function QuestionActions({ question, isAnswered }: { question: Question, isAnswe
                             <span className="ml-2 hidden sm:inline">Download</span>
                         </Button>
                         <div className="fixed top-[-9999px] left-[-9999px]">
-                            <ShareImage question={question} ref={imageRef} theme={theme} />
+                            <ShareImage question={question} user={user} ref={imageRef} theme={theme} />
                         </div>
                     </>
                 )}
@@ -261,7 +261,7 @@ export function DashboardClient({ user }: { user: User }) {
                             <AccordionContent className="p-6 pt-0 space-y-4">
                                <AnswerForm questionId={q.id} />
                                <div className="border-t pt-4 flex justify-end">
-                                    <QuestionActions question={q} isAnswered={false} />
+                                    <QuestionActions question={q} user={user} isAnswered={false} />
                                </div>
                             </AccordionContent>
                            </Card>
@@ -295,7 +295,7 @@ export function DashboardClient({ user }: { user: User }) {
                             <p className="text-xs text-muted-foreground">
                                 Answered {q.answeredAt instanceof Timestamp ? formatDistanceToNow(q.answeredAt.toDate(), { addSuffix: true }) : ''}
                             </p>
-                            <QuestionActions question={q} isAnswered={true} />
+                            <QuestionActions question={q} user={user} isAnswered={true} />
                         </CardFooter>
                     </Card>
                 ))
@@ -308,5 +308,3 @@ export function DashboardClient({ user }: { user: User }) {
     </Tabs>
   );
 }
-
-    
