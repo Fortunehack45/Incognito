@@ -19,7 +19,6 @@ export default {
       fontFamily: {
         body: ['PT Sans', 'sans-serif'],
         headline: ['Source Code Pro', 'monospace'],
-        code: ['Source Code Pro', 'monospace'],
       },
       colors: {
         background: 'hsl(var(--background))',
