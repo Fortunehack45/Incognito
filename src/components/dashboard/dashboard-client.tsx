@@ -209,7 +209,7 @@ function QuestionActions({ question, user }: { question: Question, user: User })
                 </Button>
             </div>
 
-            <div className="absolute top-0 left-0" style={{ zIndex: -1, visibility: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: '-9999px' }}>
                 <ShareImage 
                     question={question} 
                     user={user} 
@@ -353,3 +353,5 @@ export function DashboardClient({ user }: { user: User }) {
     </Tabs>
   );
 }
+
+    
