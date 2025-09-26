@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react"
 
-type Theme = "light" | "dark" | "pink" | "blue"
+type Theme = "light" | "dark" | "pink" | "blue" | "purple" | "orange" | "green" | "yellow"
 
 type ThemeProviderProps = {
   children: React.ReactNode
@@ -42,7 +42,7 @@ export function ThemeProvider({
   useEffect(() => {
     if(isMounted) {
       const root = window.document.documentElement
-      root.classList.remove("light", "dark", "pink", "blue")
+      root.classList.remove("light", "dark", "pink", "blue", "purple", "orange", "green", "yellow")
       root.classList.add(theme)
       localStorage.setItem(storageKey, theme)
     }
