@@ -1,26 +1,7 @@
 'use server';
 
 import type { User } from './types';
-import admin from 'firebase-admin';
-
-// Initialize Firebase Admin SDK
-if (!admin.apps.length) {
-  try {
-    // Use application default credentials in a deployed environment
-    admin.initializeApp();
-  } catch (error: any) {
-    // In a development environment with hot-reloading, the app can sometimes be initialized more than once.
-    // We can safely ignore this error.
-    if (error.code !== 'auth/invalid-credential' && process.env.NODE_ENV === 'development') {
-      console.warn('Firebase admin initialization error in development. This is likely safe to ignore with hot-reloading.');
-    } else if (process.env.NODE_ENV !== 'development') {
-       console.error('Firebase admin initialization error', error);
-    }
-  }
-}
-
-
-const firestore = admin.firestore();
+import { firestore } from '@/firebase/admin';
 
 const usersCollection = firestore.collection('users');
 

@@ -18,10 +18,12 @@ export async function validateQuestion(userId: string, questionText: string) {
         return { error: `Your question was deemed inappropriate. Reason: ${moderationResult.reason}` };
         }
         
-        // Revalidation is still useful to update public profiles
-        // but we no longer need to fetch user data here.
         revalidatePath('/dashboard');
 
+        // We also need to revalidate the public user profile page
+        // This is a bit tricky since we only have the userId. We'd need to fetch the user to get their username.
+        // For now, revalidating the dashboard is the most direct impact.
+        // A more robust solution might involve passing the username or revalidating the path on the client after submission.
 
         return { success: true };
     } catch (error) {
@@ -37,7 +39,7 @@ export async function revalidateAnswer(questionId: string) {
   }
   const question = await getQuestionById(questionId);
   if (question) {
-    const user = await getUserByUsername(question.toUserId);
+    const user = await getUserById(question.toUserId);
     if(user) {
         revalidatePath(`/u/${user.username}`);
     }
@@ -79,4 +81,17 @@ export async function runModeration(questionId: string) {
     console.error(e);
     return { error: 'Failed to run moderation check.' };
   }
+}
+
+// Helper function to get user by ID, useful for revalidation
+async function getUserById(userId: string) {
+    try {
+        const firestore = (await import('@/firebase/admin')).firestore;
+        const userDoc = await firestore.collection('users').doc(userId).get();
+        if (!userDoc.exists) return null;
+        return userDoc.data();
+    } catch (error) {
+        console.error("Failed to get user by ID", error);
+        return null;
+    }
 }

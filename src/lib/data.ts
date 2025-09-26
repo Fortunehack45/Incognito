@@ -1,10 +1,8 @@
 'use server';
 
 import type { Question } from './types';
-import admin from 'firebase-admin';
+import { firestore } from '@/firebase/admin';
 
-// Re-use the initialized admin app from auth.ts
-const firestore = admin.firestore();
 const questionsCollection = firestore.collection('questions');
 
 export async function getQuestionsForUser(userId: string): Promise<Question[]> {
