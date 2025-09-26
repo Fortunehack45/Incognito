@@ -12,7 +12,7 @@ export function Header() {
   const { user, loading } = useUser();
   
   return (
-    <header className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
+    <header className="border-b border-white/10 sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto px-4 flex items-center justify-between h-16">
         <Link href="/">
           <Logo />

@@ -250,7 +250,7 @@ export function DashboardClient({ user }: { user: User }) {
   const answeredQuestions = questions?.filter(q => q.isAnswered) || [];
 
   const EmptyState = ({ title, description }: { title: string, description: string }) => (
-    <div className="text-center py-16 px-4 border border-dashed rounded-lg bg-card">
+    <div className="text-center py-16 px-4 border border-dashed rounded-lg bg-card/50">
         <h3 className="text-xl font-semibold font-headline">{title}</h3>
         <p className="text-muted-foreground mt-2">{description}</p>
     </div>
@@ -258,7 +258,7 @@ export function DashboardClient({ user }: { user: User }) {
 
   return (
     <Tabs defaultValue="unanswered">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="grid w-full grid-cols-2 bg-secondary/30">
         <TabsTrigger value="unanswered">Unanswered ({unansweredQuestions.length})</TabsTrigger>
         <TabsTrigger value="answered">Answered ({answeredQuestions.length})</TabsTrigger>
       </TabsList>

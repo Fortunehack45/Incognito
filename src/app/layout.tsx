@@ -9,7 +9,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
+    <html lang="en" className="h-full orange" suppressHydrationWarning>
       <head>
         <title>Incognito</title>
         <meta name="description" content="Ask and answer anonymous questions" />
