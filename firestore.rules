@@ -1,47 +1,32 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-
-    // USERS collection
+    // --- Users Collection ---
+    // Anyone can read public user profiles.
+    // A user can only create or update their own profile.
     match /users/{userId} {
-      // Anyone can read a user's public profile (username, bio)
-      allow get: if true;
-      
-      // A user can create their own profile during signup
-      allow create: if isOwner(userId);
-
-      // A user can only update their own bio
-      allow update: if isOwner(userId) && request.resource.data.keys().hasOnly(['bio']);
-
-      // A user cannot delete their profile through the client
-      allow delete: if false;
-
-      // NOTES sub-collection
-      match /notes/{noteId} {
-        // A user can perform any action on their own notes
-        allow read, write, delete: if isOwner(userId);
-      }
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
     }
 
-    // QUESTIONS collection
+    // --- Questions Collection ---
+    // - Anyone can create (ask) a question.
+    // - Anyone can read answered questions.
+    // - Only the recipient can read their unanswered questions.
+    // - Only the recipient can update (answer) or delete their questions.
     match /questions/{questionId} {
-      // Anyone can create (ask) a question
+      allow read: if resource.data.isAnswered == true;
       allow create: if true;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.toUserId;
+    }
 
-      // Only the recipient can read a question before it's answered
-      allow read: if resource.data.isAnswered == true || isOwner(resource.data.toUserId);
-
-      // The recipient can update a question (to answer it)
-      allow update: if isOwner(resource.data.toUserId);
-      
-      // The recipient can delete a question
-      allow delete: if isOwner(resource.data.toUserId);
+    // --- Notes Subcollection ---
+    // A user can only read/write/delete their own notes.
+    match /users/{userId}/notes/{noteId} {
+      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
