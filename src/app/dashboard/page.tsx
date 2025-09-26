@@ -57,20 +57,24 @@ function DashboardSkeleton() {
 
 export default function DashboardPage() {
   const { user: firebaseUser, loading: loadingAuth } = useUser();
-  const { data: appUser, loading: loadingUser } = useDoc<User>(firebaseUser ? `users/${firebaseUser.uid}`: '');
+  // Ensure useDoc path is null if firebaseUser is not available
+  const { data: appUser, loading: loadingUser } = useDoc<User>(firebaseUser?.uid ? `users/${firebaseUser.uid}`: '');
   
   if (loadingAuth) {
     return <DashboardSkeleton />;
   }
 
-  if (!firebaseUser) {
+  // On the client, if auth has loaded and there's no user, redirect.
+  if (!loadingAuth && !firebaseUser) {
     return redirect("/login");
   }
   
-  if (loadingUser) {
+  // Show skeleton while the app user profile is loading
+  if (loadingUser || !firebaseUser) {
      return <DashboardSkeleton />;
   }
   
+  // This can happen if the user record in firestore is deleted but the auth user still exists
   if (!appUser) {
     return (
        <div className="container mx-auto px-4 py-8">

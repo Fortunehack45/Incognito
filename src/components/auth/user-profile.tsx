@@ -21,8 +21,10 @@ export function UserProfile({ firebaseUser }: { firebaseUser: FirebaseUser }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.refresh(); // Force a refresh to clear client-side cache
+      // Refresh the router to clear the client-side cache of user data
+      router.refresh();
       toast({ title: "Logged out successfully."});
+      // Then push to the login page
       router.push('/login');
     } catch (error) {
       toast({ title: "Logout Failed", description: "An error occurred during logout.", variant: "destructive" });
